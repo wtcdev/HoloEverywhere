@@ -604,7 +604,7 @@ public class ListView extends android.widget.ListView implements OnWindowFocusCh
 	        ss.checkedItemCount = mCheckedItemCount;
 	        return ss;
 		} catch (Exception e) {
-			Log.e(ListView.class.getSimpleName(), "ListView.class.getSimpleName()", e);
+			Log.e(ListView.class.getSimpleName(), "DE766: Caught SavedState class not found exception.", e);
 			return null;
 		}
     }
