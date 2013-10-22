@@ -573,30 +573,36 @@ public class ListView extends android.widget.ListView implements OnWindowFocusCh
 
     @Override
     public void onRestoreInstanceState(Parcelable state) {
-        SavedState ss = (SavedState) state;
-        super.onRestoreInstanceState(ss.getSuperState());
-        if (ss.checkState != null) {
-            mCheckStates = ss.checkState;
-        }
-        if (ss.checkIdState != null) {
-            mCheckedIdStates = ss.checkIdState;
-        }
-        mCheckedItemCount = ss.checkedItemCount;
-        if (ss.inActionMode && mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL
-                && mMultiChoiceModeCallback != null) {
-            mChoiceActionMode = startActionMode(mMultiChoiceModeCallback);
-        }
-        requestLayout();
+    	try {
+	        SavedState ss = (SavedState) state;
+	        super.onRestoreInstanceState(ss.getSuperState());
+	        if (ss.checkState != null) {
+	            mCheckStates = ss.checkState;
+	        }
+	        if (ss.checkIdState != null) {
+	            mCheckedIdStates = ss.checkIdState;
+	        }
+	        mCheckedItemCount = ss.checkedItemCount;
+	        if (ss.inActionMode && mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL
+	                && mMultiChoiceModeCallback != null) {
+	            mChoiceActionMode = startActionMode(mMultiChoiceModeCallback);
+	        }
+	        requestLayout();
+		} catch (Exception e) {
+		}
     }
 
     @Override
     public Parcelable onSaveInstanceState() {
-        SavedState ss = new SavedState(super.onSaveInstanceState());
-        ss.inActionMode = mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL && mChoiceActionMode != null;
-        ss.checkState = mCheckStates;
-        ss.checkIdState = mCheckedIdStates;
-        ss.checkedItemCount = mCheckedItemCount;
-        return ss;
+    	try {
+	        SavedState ss = new SavedState(super.onSaveInstanceState());
+	        ss.inActionMode = mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL && mChoiceActionMode != null;
+	        ss.checkState = mCheckStates;
+	        ss.checkIdState = mCheckedIdStates;
+	        ss.checkedItemCount = mCheckedItemCount;
+	        return ss;
+		} catch (Exception e) {
+		}
     }
 
     @Override
