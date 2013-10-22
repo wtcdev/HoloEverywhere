@@ -25,6 +25,7 @@ import android.os.Build.VERSION_CODES;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.HapticFeedbackConstants;
@@ -589,6 +590,7 @@ public class ListView extends android.widget.ListView implements OnWindowFocusCh
 	        }
 	        requestLayout();
 		} catch (Exception e) {
+			Log.e(ListView.class.getSimpleName(), "DE766: Caught SavedState class not found exception.", e);
 		}
     }
 
@@ -602,6 +604,8 @@ public class ListView extends android.widget.ListView implements OnWindowFocusCh
 	        ss.checkedItemCount = mCheckedItemCount;
 	        return ss;
 		} catch (Exception e) {
+			Log.e(ListView.class.getSimpleName(), "ListView.class.getSimpleName()", e);
+			return null;
 		}
     }
 
