@@ -2,12 +2,12 @@ apply plugin: 'android-library'
 
 dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
-    compile project(':mc-android-oem:wtcsdk-android:HoloEverywhere:ActionBarSherlock:actionbarsherlock')
+    compile project(':wtcsdk-android:HoloEverywhere:ActionBarSherlock:actionbarsherlock')
 }
 
 android {
     compileSdkVersion 16
-    buildToolsVersion "19.0.0"
+    buildToolsVersion "19.0.1"
 
     sourceSets {
         main {
