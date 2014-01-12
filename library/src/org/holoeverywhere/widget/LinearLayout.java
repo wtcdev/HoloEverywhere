@@ -1,27 +1,22 @@
 
 package org.holoeverywhere.widget;
 
-import org.holoeverywhere.R;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Build.VERSION;
+import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewDebug;
-import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 
-public class LinearLayout extends android.widget.LinearLayout {
+import org.holoeverywhere.R;
+import org.holoeverywhere.drawable.DrawableCompat;
+
+public class LinearLayout extends android.widget.LinearLayout implements DrawableCompat.IStateOverlay {
     public static final int HORIZONTAL = 0;
-    private static final int INDEX_BOTTOM = 2;
-    private static final int INDEX_CENTER_VERTICAL = 0;
-    private static final int INDEX_FILL = 3;
-    private static final int INDEX_TOP = 1;
     public static final int LAYOUT_DIRECTION_LTR = 0;
     public static final int LAYOUT_DIRECTION_RTL = 1;
     public static final int SHOW_DIVIDER_ALL = 7;
@@ -30,7 +25,51 @@ public class LinearLayout extends android.widget.LinearLayout {
     public static final int SHOW_DIVIDER_MIDDLE = 2;
     public static final int SHOW_DIVIDER_NONE = 0;
     public static final int VERTICAL = 1;
+    private static final int INDEX_BOTTOM = 2;
+    private static final int INDEX_CENTER_VERTICAL = 0;
+    private static final int INDEX_FILL = 3;
+    private static final int INDEX_TOP = 1;
     private static final int VERTICAL_GRAVITY_COUNT = 4;
+    private final DrawableCompat.StateOverlay mStateOverlay;
+    private Drawable mDivider;
+    private int mDividerHeight;
+    private int mDividerPadding;
+    private int mDividerWidth;
+    private int mShowDividers;
+    private int mGravity;
+    private int[] mMaxAscent, mMaxDescent;
+    private int mTotalLength;
+    private int mBaselineChildTop;
+    private boolean mUseLargestChild;
+
+    public LinearLayout(Context context) {
+        this(context, null);
+    }
+
+    public LinearLayout(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public LinearLayout(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs);
+        TypedArray a = context.obtainStyledAttributes(attrs,
+                R.styleable.LinearLayout, defStyle, 0);
+        int index = a.getInt(R.styleable.LinearLayout_android_gravity, -1);
+        if (index >= 0) {
+            setGravity(index);
+        }
+
+        setMeasureWithLargestChildEnabled(a.getBoolean(R.styleable.LinearLayout_android_measureWithLargestChild, false));
+        setDividerDrawable(a.getDrawable(R.styleable.LinearLayout_android_divider));
+        TypedValue value = new TypedValue();
+        a.getValue(R.styleable.LinearLayout_android_showDividers, value);
+        mShowDividers = value.data;
+        a.getValue(R.styleable.LinearLayout_android_dividerPadding, value);
+        mDividerPadding = TypedValue.complexToDimensionPixelSize(value.data, context.getResources().getDisplayMetrics());
+        a.recycle();
+
+        mStateOverlay = new DrawableCompat.StateOverlay(this, context, attrs, defStyle);
+    }
 
     public static int getAbsoluteGravity(int gravity, int layoutDirection) {
         int result = gravity;
@@ -55,143 +94,42 @@ public class LinearLayout extends android.widget.LinearLayout {
         return result;
     }
 
-    public static int resolveSizeAndState(int size, int measureSpec, int childMeasuredState) {
-        int result = size;
-        int specMode = MeasureSpec.getMode(measureSpec);
-        int specSize = MeasureSpec.getSize(measureSpec);
-        switch (specMode) {
-            case MeasureSpec.UNSPECIFIED:
-                result = size;
-                break;
-            case MeasureSpec.AT_MOST:
-                if (specSize < size) {
-                    result = specSize | MEASURED_STATE_TOO_SMALL;
-                } else {
-                    result = size;
-                }
-                break;
-            case MeasureSpec.EXACTLY:
-                result = specSize;
-                break;
-        }
-        return result | childMeasuredState & MEASURED_STATE_MASK;
+    public boolean isMeasureWithLargestChildEnabled() {
+        return mUseLargestChild;
     }
 
-    @ViewDebug.ExportedProperty(category = "layout")
-    private boolean mBaselineAligned = true;
-    @ViewDebug.ExportedProperty(category = "layout")
-    private int mBaselineAlignedChildIndex = -1;
-    @ViewDebug.ExportedProperty(category = "measurement")
-    private int mBaselineChildTop = 0;
-    private Drawable mDivider;
-    private int mDividerHeight;
-    private int mDividerPadding;
-    private int mDividerWidth;
-    @ViewDebug.ExportedProperty(category = "measurement", flagMapping = {
-            @ViewDebug.FlagToString(mask = -1,
-                    equals = -1, name = "NONE"),
-            @ViewDebug.FlagToString(mask = Gravity.NO_GRAVITY,
-                    equals = Gravity.NO_GRAVITY, name = "NONE"),
-            @ViewDebug.FlagToString(mask = Gravity.TOP,
-                    equals = Gravity.TOP, name = "TOP"),
-            @ViewDebug.FlagToString(mask = Gravity.BOTTOM,
-                    equals = Gravity.BOTTOM, name = "BOTTOM"),
-            @ViewDebug.FlagToString(mask = Gravity.LEFT,
-                    equals = Gravity.LEFT, name = "LEFT"),
-            @ViewDebug.FlagToString(mask = Gravity.RIGHT,
-                    equals = Gravity.RIGHT, name = "RIGHT"),
-            @ViewDebug.FlagToString(mask = Gravity.START,
-                    equals = Gravity.START, name = "START"),
-            @ViewDebug.FlagToString(mask = Gravity.END,
-                    equals = Gravity.END, name = "END"),
-            @ViewDebug.FlagToString(mask = Gravity.CENTER_VERTICAL,
-                    equals = Gravity.CENTER_VERTICAL, name = "CENTER_VERTICAL"),
-            @ViewDebug.FlagToString(mask = Gravity.FILL_VERTICAL,
-                    equals = Gravity.FILL_VERTICAL, name = "FILL_VERTICAL"),
-            @ViewDebug.FlagToString(mask = Gravity.CENTER_HORIZONTAL,
-                    equals = Gravity.CENTER_HORIZONTAL, name = "CENTER_HORIZONTAL"),
-            @ViewDebug.FlagToString(mask = Gravity.FILL_HORIZONTAL,
-                    equals = Gravity.FILL_HORIZONTAL, name = "FILL_HORIZONTAL"),
-            @ViewDebug.FlagToString(mask = Gravity.CENTER,
-                    equals = Gravity.CENTER, name = "CENTER"),
-            @ViewDebug.FlagToString(mask = Gravity.FILL,
-                    equals = Gravity.FILL, name = "FILL"),
-            @ViewDebug.FlagToString(mask = Gravity.RELATIVE_LAYOUT_DIRECTION,
-                    equals = Gravity.RELATIVE_LAYOUT_DIRECTION, name = "RELATIVE")
-    })
-    private int mGravity = Gravity.START | Gravity.TOP;
-    private int[] mMaxAscent;
-    private int[] mMaxDescent;
-    @ViewDebug.ExportedProperty(category = "measurement")
-    private int mOrientation;
-    private int mShowDividers;
-    @ViewDebug.ExportedProperty(category = "measurement")
-    private int mTotalLength;
-    @ViewDebug.ExportedProperty(category = "layout")
-    private boolean mUseLargestChild;
-
-    @ViewDebug.ExportedProperty(category = "layout")
-    private float mWeightSum;
-
-    public LinearLayout(Context context) {
-        this(context, null);
-    }
-
-    public LinearLayout(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public LinearLayout(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs);
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                R.styleable.LinearLayout, defStyle, 0);
-        int index = a.getInt(R.styleable.LinearLayout_android_orientation, -1);
-        if (index >= 0) {
-            setOrientation(index);
-        }
-        index = a.getInt(R.styleable.LinearLayout_android_gravity, -1);
-        if (index >= 0) {
-            setGravity(index);
-        }
-        boolean baselineAligned = a.getBoolean(R.styleable.LinearLayout_android_baselineAligned,
-                true);
-        if (!baselineAligned) {
-            setBaselineAligned(baselineAligned);
-        }
-        mWeightSum = a.getFloat(R.styleable.LinearLayout_android_weightSum, -1.0f);
-        mBaselineAlignedChildIndex = a.getInt(
-                R.styleable.LinearLayout_android_baselineAlignedChildIndex, -1);
-        mUseLargestChild = a.getBoolean(R.styleable.LinearLayout_android_measureWithLargestChild,
-                false);
-        setDividerDrawable(a.getDrawable(R.styleable.LinearLayout_android_divider));
-
-        if (a.hasValue(R.styleable.LinearLayout_showDividers)) {
-            mShowDividers = a.getInt(R.styleable.LinearLayout_showDividers, SHOW_DIVIDER_NONE);
-        } else {
-            mShowDividers = a.getInt(R.styleable.LinearLayout_android_showDividers,
-                    SHOW_DIVIDER_NONE);
-        }
-
-        if (a.hasValue(R.styleable.LinearLayout_dividerPadding)) {
-            mDividerPadding = a.getDimensionPixelSize(R.styleable.LinearLayout_dividerPadding, 0);
-        } else {
-            mDividerPadding = a.getDimensionPixelSize(
-                    R.styleable.LinearLayout_android_dividerPadding, 0);
-        }
-
-        a.recycle();
+    public void setMeasureWithLargestChildEnabled(boolean enabled) {
+        mUseLargestChild = enabled;
     }
 
     @Override
-    protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
-        return p instanceof LinearLayout.LayoutParams;
+    public boolean isActivated() {
+        return mStateOverlay.isActivated();
+    }
+
+    @Override
+    public void setActivated(boolean activated) {
+        mStateOverlay.setActivated(activated);
+    }
+
+    @Override
+    protected int[] onCreateDrawableState(int extraSpace) {
+        if (mStateOverlay == null) {
+            return super.onCreateDrawableState(extraSpace);
+        }
+        return mStateOverlay.onCreateDrawableState(extraSpace);
+    }
+
+    @Override
+    public int[] superOnCreateDrawableState(int extraSpace) {
+        return super.onCreateDrawableState(extraSpace);
     }
 
     void drawDividersHorizontal(Canvas canvas) {
-        final int count = getVirtualChildCount();
+        final int count = getChildCount();
         final boolean isLayoutRtl = isLayoutRtl();
         for (int i = 0; i < count; i++) {
-            final View child = getVirtualChildAt(i);
+            final View child = getChildAt(i);
             if (child != null && child.getVisibility() != GONE) {
                 if (hasDividerBeforeChildAt(i)) {
                     final LayoutParams lp = (LayoutParams) child.getLayoutParams();
@@ -206,7 +144,7 @@ public class LinearLayout extends android.widget.LinearLayout {
             }
         }
         if (hasDividerBeforeChildAt(count)) {
-            final View child = getVirtualChildAt(count - 1);
+            final View child = getChildAt(count - 1);
             int position;
             if (child == null) {
                 if (isLayoutRtl) {
@@ -227,9 +165,9 @@ public class LinearLayout extends android.widget.LinearLayout {
     }
 
     void drawDividersVertical(Canvas canvas) {
-        final int count = getVirtualChildCount();
+        final int count = getChildCount();
         for (int i = 0; i < count; i++) {
-            final View child = getVirtualChildAt(i);
+            final View child = getChildAt(i);
             if (child != null && child.getVisibility() != GONE) {
                 if (hasDividerBeforeChildAt(i)) {
                     final LayoutParams lp = (LayoutParams) child.getLayoutParams();
@@ -239,7 +177,7 @@ public class LinearLayout extends android.widget.LinearLayout {
             }
         }
         if (hasDividerBeforeChildAt(count)) {
-            final View child = getVirtualChildAt(count - 1);
+            final View child = getChildAt(count - 1);
             int bottom = 0;
             if (child == null) {
                 bottom = getHeight() - getPaddingBottom() - mDividerHeight;
@@ -267,7 +205,7 @@ public class LinearLayout extends android.widget.LinearLayout {
         int uniformMeasureSpec = MeasureSpec.makeMeasureSpec(getMeasuredHeight(),
                 MeasureSpec.EXACTLY);
         for (int i = 0; i < count; ++i) {
-            final View child = getVirtualChildAt(i);
+            final View child = getChildAt(i);
             if (child.getVisibility() != GONE) {
                 LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) child.getLayoutParams();
                 if (lp.height == android.view.ViewGroup.LayoutParams.MATCH_PARENT) {
@@ -284,7 +222,7 @@ public class LinearLayout extends android.widget.LinearLayout {
         int uniformMeasureSpec = MeasureSpec.makeMeasureSpec(getMeasuredWidth(),
                 MeasureSpec.EXACTLY);
         for (int i = 0; i < count; ++i) {
-            final View child = getVirtualChildAt(i);
+            final View child = getChildAt(i);
             if (child.getVisibility() != GONE) {
                 LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) child.getLayoutParams();
                 if (lp.width == android.view.ViewGroup.LayoutParams.MATCH_PARENT) {
@@ -298,76 +236,25 @@ public class LinearLayout extends android.widget.LinearLayout {
     }
 
     @Override
-    protected LayoutParams generateDefaultLayoutParams() {
-        if (mOrientation == HORIZONTAL) {
-            return new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
-                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-        } else if (mOrientation == VERTICAL) {
-            return new LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-        }
-        return null;
-    }
-
-    @Override
-    public LayoutParams generateLayoutParams(AttributeSet attrs) {
-        return new LinearLayout.LayoutParams(getContext(), attrs);
-    }
-
-    @Override
-    protected LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
-        return new LayoutParams(p);
-    }
-
-    @Override
-    public int getBaseline() {
-        if (mBaselineAlignedChildIndex < 0) {
-            return super.getBaseline();
-        }
-        if (getChildCount() <= mBaselineAlignedChildIndex) {
-            throw new RuntimeException("mBaselineAlignedChildIndex of LinearLayout "
-                    + "set to an index that is out of bounds.");
-        }
-        final View child = getChildAt(mBaselineAlignedChildIndex);
-        final int childBaseline = child.getBaseline();
-        if (childBaseline == -1) {
-            if (mBaselineAlignedChildIndex == 0) {
-                return -1;
-            }
-            throw new RuntimeException("mBaselineAlignedChildIndex of LinearLayout "
-                    + "points to a View that doesn't know how to get its baseline.");
-        }
-        int childTop = mBaselineChildTop;
-        if (mOrientation == VERTICAL) {
-            final int majorGravity = mGravity & Gravity.VERTICAL_GRAVITY_MASK;
-            if (majorGravity != Gravity.TOP) {
-                switch (majorGravity) {
-                    case Gravity.BOTTOM:
-                        childTop = getBottom() - getTop() - getPaddingBottom() - mTotalLength;
-                        break;
-                    case Gravity.CENTER_VERTICAL:
-                        childTop += (getBottom() - getTop() - getPaddingTop() - getPaddingBottom() -
-                                mTotalLength) / 2;
-                        break;
-                }
-            }
-        }
-        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) child.getLayoutParams();
-        return childTop + lp.topMargin + childBaseline;
-    }
-
-    @Override
-    public int getBaselineAlignedChildIndex() {
-        return mBaselineAlignedChildIndex;
-    }
-
-    int getChildrenSkipCount(View child, int index) {
-        return 0;
-    }
-
-    @Override
     public Drawable getDividerDrawable() {
         return mDivider;
+    }
+
+    @Override
+    public void setDividerDrawable(Drawable divider) {
+        if (divider == mDivider) {
+            return;
+        }
+        mDivider = divider;
+        if (divider != null) {
+            mDividerWidth = divider.getIntrinsicWidth();
+            mDividerHeight = divider.getIntrinsicHeight();
+        } else {
+            mDividerWidth = 0;
+            mDividerHeight = 0;
+        }
+        setWillNotDraw(divider == null);
+        requestLayout();
     }
 
     @Override
@@ -375,25 +262,13 @@ public class LinearLayout extends android.widget.LinearLayout {
         return mDividerPadding;
     }
 
+    @Override
+    public void setDividerPadding(int padding) {
+        mDividerPadding = padding;
+    }
+
     public int getDividerWidth() {
         return mDividerWidth;
-    }
-
-    public int getLayoutDirection() {
-        return LAYOUT_DIRECTION_LTR;
-    }
-
-    int getLocationOffset(View child) {
-        return 0;
-    }
-
-    int getNextLocationOffset(View child) {
-        return 0;
-    }
-
-    @Override
-    public int getOrientation() {
-        return mOrientation;
     }
 
     @Override
@@ -401,17 +276,12 @@ public class LinearLayout extends android.widget.LinearLayout {
         return mShowDividers;
     }
 
-    View getVirtualChildAt(int index) {
-        return getChildAt(index);
-    }
-
-    int getVirtualChildCount() {
-        return getChildCount();
-    }
-
     @Override
-    public float getWeightSum() {
-        return mWeightSum;
+    public void setShowDividers(int showDividers) {
+        if (showDividers != mShowDividers) {
+            requestLayout();
+        }
+        mShowDividers = showDividers;
     }
 
     protected boolean hasDividerBeforeChildAt(int childIndex) {
@@ -432,18 +302,8 @@ public class LinearLayout extends android.widget.LinearLayout {
         return false;
     }
 
-    @Override
-    public boolean isBaselineAligned() {
-        return mBaselineAligned;
-    }
-
     protected boolean isLayoutRtl() {
-        return getLayoutDirection() == LAYOUT_DIRECTION_RTL;
-    }
-
-    @Override
-    public boolean isMeasureWithLargestChildEnabled() {
-        return mUseLargestChild;
+        return ViewCompat.getLayoutDirection(this) == LAYOUT_DIRECTION_RTL;
     }
 
     void layoutHorizontal() {
@@ -454,13 +314,13 @@ public class LinearLayout extends android.widget.LinearLayout {
         final int height = getBottom() - getTop();
         int childBottom = height - getPaddingBottom();
         int childSpace = height - paddingTop - getPaddingBottom();
-        final int count = getVirtualChildCount();
+        final int count = getChildCount();
         final int majorGravity = mGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK;
         final int minorGravity = mGravity & Gravity.VERTICAL_GRAVITY_MASK;
-        final boolean baselineAligned = mBaselineAligned;
+        final boolean baselineAligned = isBaselineAligned();
         final int[] maxAscent = mMaxAscent;
         final int[] maxDescent = mMaxDescent;
-        final int layoutDirection = getLayoutDirection();
+        final int layoutDirection = ViewCompat.getLayoutDirection(this);
         switch (getAbsoluteGravity(majorGravity, layoutDirection)) {
             case Gravity.RIGHT:
                 childLeft = getPaddingLeft() + getRight() - getLeft() - mTotalLength;
@@ -481,10 +341,8 @@ public class LinearLayout extends android.widget.LinearLayout {
         }
         for (int i = 0; i < count; i++) {
             int childIndex = start + dir * i;
-            final View child = getVirtualChildAt(childIndex);
-            if (child == null) {
-                childLeft += measureNullChild(childIndex);
-            } else if (child.getVisibility() != GONE) {
+            final View child = getChildAt(childIndex);
+            if (child != null && child.getVisibility() != GONE) {
                 final int childWidth = child.getMeasuredWidth();
                 final int childHeight = child.getMeasuredHeight();
                 int childBaseline = -1;
@@ -524,11 +382,8 @@ public class LinearLayout extends android.widget.LinearLayout {
                     childLeft += mDividerWidth;
                 }
                 childLeft += lp.leftMargin;
-                setChildFrame(child, childLeft + getLocationOffset(child), childTop,
-                        childWidth, childHeight);
-                childLeft += childWidth + lp.rightMargin +
-                        getNextLocationOffset(child);
-                i += getChildrenSkipCount(child, childIndex);
+                setChildFrame(child, childLeft, childTop, childWidth, childHeight);
+                childLeft += childWidth + lp.rightMargin;
             }
         }
     }
@@ -540,7 +395,7 @@ public class LinearLayout extends android.widget.LinearLayout {
         final int width = getRight() - getLeft();
         int childRight = width - getPaddingRight();
         int childSpace = width - paddingLeft - getPaddingRight();
-        final int count = getVirtualChildCount();
+        final int count = getChildCount();
         final int majorGravity = mGravity & Gravity.VERTICAL_GRAVITY_MASK;
         final int minorGravity = mGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK;
         switch (majorGravity) {
@@ -556,10 +411,8 @@ public class LinearLayout extends android.widget.LinearLayout {
                 break;
         }
         for (int i = 0; i < count; i++) {
-            final View child = getVirtualChildAt(i);
-            if (child == null) {
-                childTop += measureNullChild(i);
-            } else if (child.getVisibility() != GONE) {
+            final View child = getChildAt(i);
+            if (child != null && child.getVisibility() != GONE) {
                 final int childWidth = child.getMeasuredWidth();
                 final int childHeight = child.getMeasuredHeight();
                 final LinearLayout.LayoutParams lp =
@@ -568,7 +421,7 @@ public class LinearLayout extends android.widget.LinearLayout {
                 if (gravity < 0) {
                     gravity = minorGravity;
                 }
-                final int layoutDirection = getLayoutDirection();
+                final int layoutDirection = ViewCompat.getLayoutDirection(this);
                 final int absoluteGravity = getAbsoluteGravity(gravity, layoutDirection);
                 switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
                     case Gravity.CENTER_HORIZONTAL:
@@ -587,17 +440,15 @@ public class LinearLayout extends android.widget.LinearLayout {
                     childTop += mDividerHeight;
                 }
                 childTop += lp.topMargin;
-                setChildFrame(child, childLeft, childTop + getLocationOffset(child),
-                        childWidth, childHeight);
-                childTop += childHeight + lp.bottomMargin + getNextLocationOffset(child);
-                i += getChildrenSkipCount(child, i);
+                setChildFrame(child, childLeft, childTop, childWidth, childHeight);
+                childTop += childHeight + lp.bottomMargin;
             }
         }
     }
 
     void measureChildBeforeLayout(View child, int childIndex,
-            int widthMeasureSpec, int totalWidth, int heightMeasureSpec,
-            int totalHeight) {
+                                  int widthMeasureSpec, int totalWidth, int heightMeasureSpec,
+                                  int totalHeight) {
         measureChildWithMargins(child, widthMeasureSpec, totalWidth,
                 heightMeasureSpec, totalHeight);
     }
@@ -610,7 +461,7 @@ public class LinearLayout extends android.widget.LinearLayout {
         int weightedMaxHeight = 0;
         boolean allFillParent = true;
         float totalWeight = 0;
-        final int count = getVirtualChildCount();
+        final int count = getChildCount();
         final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         boolean matchHeight = false;
@@ -622,18 +473,13 @@ public class LinearLayout extends android.widget.LinearLayout {
         final int[] maxDescent = mMaxDescent;
         maxAscent[0] = maxAscent[1] = maxAscent[2] = maxAscent[3] = -1;
         maxDescent[0] = maxDescent[1] = maxDescent[2] = maxDescent[3] = -1;
-        final boolean baselineAligned = mBaselineAligned;
-        final boolean useLargestChild = mUseLargestChild;
+        final boolean baselineAligned = isBaselineAligned();
+        final boolean useLargestChild = isMeasureWithLargestChildEnabled();
         final boolean isExactly = widthMode == MeasureSpec.EXACTLY;
         int largestChildWidth = Integer.MIN_VALUE;
         for (int i = 0; i < count; ++i) {
-            final View child = getVirtualChildAt(i);
-            if (child == null) {
-                mTotalLength += measureNullChild(i);
-                continue;
-            }
-            if (child.getVisibility() == GONE) {
-                i += getChildrenSkipCount(child, i);
+            final View child = getChildAt(i);
+            if (child == null || child.getVisibility() == GONE) {
                 continue;
             }
             if (hasDividerBeforeChildAt(i)) {
@@ -668,12 +514,10 @@ public class LinearLayout extends android.widget.LinearLayout {
                 }
                 final int childWidth = child.getMeasuredWidth();
                 if (isExactly) {
-                    mTotalLength += childWidth + lp.leftMargin + lp.rightMargin +
-                            getNextLocationOffset(child);
+                    mTotalLength += childWidth + lp.leftMargin + lp.rightMargin;
                 } else {
                     final int totalLength = mTotalLength;
-                    mTotalLength = Math.max(totalLength, totalLength + childWidth + lp.leftMargin +
-                            lp.rightMargin + getNextLocationOffset(child));
+                    mTotalLength = Math.max(totalLength, totalLength + childWidth + lp.leftMargin + lp.rightMargin);
                 }
                 if (useLargestChild) {
                     largestChildWidth = Math.max(childWidth, largestChildWidth);
@@ -711,7 +555,6 @@ public class LinearLayout extends android.widget.LinearLayout {
                 alternativeMaxHeight = Math.max(alternativeMaxHeight,
                         matchHeightLocally ? margin : childHeight);
             }
-            i += getChildrenSkipCount(child, i);
         }
         if (mTotalLength > 0 && hasDividerBeforeChildAt(count)) {
             mTotalLength += mDividerWidth;
@@ -732,41 +575,35 @@ public class LinearLayout extends android.widget.LinearLayout {
                 (widthMode == MeasureSpec.AT_MOST || widthMode == MeasureSpec.UNSPECIFIED)) {
             mTotalLength = 0;
             for (int i = 0; i < count; ++i) {
-                final View child = getVirtualChildAt(i);
-                if (child == null) {
-                    mTotalLength += measureNullChild(i);
-                    continue;
-                }
-                if (child.getVisibility() == GONE) {
-                    i += getChildrenSkipCount(child, i);
+                final View child = getChildAt(i);
+                if (child == null || child.getVisibility() == GONE) {
                     continue;
                 }
                 final LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)
                         child.getLayoutParams();
                 if (isExactly) {
-                    mTotalLength += largestChildWidth + lp.leftMargin + lp.rightMargin +
-                            getNextLocationOffset(child);
+                    mTotalLength += largestChildWidth + lp.leftMargin + lp.rightMargin;
                 } else {
                     final int totalLength = mTotalLength;
-                    mTotalLength = Math.max(totalLength, totalLength + largestChildWidth +
-                            lp.leftMargin + lp.rightMargin + getNextLocationOffset(child));
+                    mTotalLength = Math.max(totalLength, totalLength + largestChildWidth + lp.leftMargin + lp.rightMargin);
                 }
             }
         }
         mTotalLength += getPaddingLeft() + getPaddingRight();
         int widthSize = mTotalLength;
         widthSize = Math.max(widthSize, getSuggestedMinimumWidth());
-        int widthSizeAndState = resolveSizeAndState(widthSize, widthMeasureSpec, 0);
+        int widthSizeAndState = ViewCompat.resolveSizeAndState(widthSize, widthMeasureSpec, 0);
         widthSize = widthSizeAndState & MEASURED_SIZE_MASK;
         int delta = widthSize - mTotalLength;
         if (delta != 0 && totalWeight > 0.0f) {
-            float weightSum = mWeightSum > 0.0f ? mWeightSum : totalWeight;
+            final float f = getWeightSum();
+            float weightSum = f > 0.0f ? f : totalWeight;
             maxAscent[0] = maxAscent[1] = maxAscent[2] = maxAscent[3] = -1;
             maxDescent[0] = maxDescent[1] = maxDescent[2] = maxDescent[3] = -1;
             maxHeight = -1;
             mTotalLength = 0;
             for (int i = 0; i < count; ++i) {
-                final View child = getVirtualChildAt(i);
+                final View child = getChildAt(i);
                 if (child == null || child.getVisibility() == View.GONE) {
                     continue;
                 }
@@ -779,7 +616,7 @@ public class LinearLayout extends android.widget.LinearLayout {
                     delta -= share;
                     final int childHeightMeasureSpec = getChildMeasureSpec(
                             heightMeasureSpec, getPaddingTop() + getPaddingBottom() + lp.topMargin
-                                    + lp.bottomMargin,
+                            + lp.bottomMargin,
                             lp.height);
                     if (lp.width != 0 || widthMode != MeasureSpec.EXACTLY) {
                         int childWidth = child.getMeasuredWidth() + share;
@@ -799,12 +636,10 @@ public class LinearLayout extends android.widget.LinearLayout {
                     }
                 }
                 if (isExactly) {
-                    mTotalLength += child.getMeasuredWidth() + lp.leftMargin + lp.rightMargin +
-                            getNextLocationOffset(child);
+                    mTotalLength += child.getMeasuredWidth() + lp.leftMargin + lp.rightMargin;
                 } else {
                     final int totalLength = mTotalLength;
-                    mTotalLength = Math.max(totalLength, totalLength + child.getMeasuredWidth() +
-                            lp.leftMargin + lp.rightMargin + getNextLocationOffset(child));
+                    mTotalLength = Math.max(totalLength, totalLength + child.getMeasuredWidth() + lp.leftMargin + lp.rightMargin);
                 }
                 boolean matchHeightLocally = heightMode != MeasureSpec.EXACTLY &&
                         lp.height == android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -845,7 +680,7 @@ public class LinearLayout extends android.widget.LinearLayout {
             alternativeMaxHeight = Math.max(alternativeMaxHeight, weightedMaxHeight);
             if (useLargestChild && widthMode != MeasureSpec.EXACTLY) {
                 for (int i = 0; i < count; i++) {
-                    final View child = getVirtualChildAt(i);
+                    final View child = getChildAt(i);
                     if (child == null || child.getVisibility() == View.GONE) {
                         continue;
                     }
@@ -867,15 +702,49 @@ public class LinearLayout extends android.widget.LinearLayout {
         maxHeight += getPaddingTop() + getPaddingBottom();
         maxHeight = Math.max(maxHeight, getSuggestedMinimumHeight());
         setMeasuredDimension(widthSizeAndState | childState & MEASURED_STATE_MASK,
-                resolveSizeAndState(maxHeight, heightMeasureSpec,
+                ViewCompat.resolveSizeAndState(maxHeight, heightMeasureSpec,
                         childState << MEASURED_HEIGHT_STATE_SHIFT));
         if (matchHeight) {
             forceUniformHeight(count, widthMeasureSpec);
         }
     }
 
-    int measureNullChild(int childIndex) {
-        return 0;
+    public int getBaseline() {
+        final int baselineAlignedChildIndex = getBaselineAlignedChildIndex();
+        if (baselineAlignedChildIndex < 0) {
+            return super.getBaseline();
+        }
+        if (getChildCount() <= baselineAlignedChildIndex) {
+            throw new RuntimeException("mBaselineAlignedChildIndex of LinearLayout "
+                    + "set to an index that is out of bounds.");
+        }
+        final View child = getChildAt(baselineAlignedChildIndex);
+        final int childBaseline = child.getBaseline();
+        if (childBaseline == -1) {
+            if (baselineAlignedChildIndex == 0) {
+                return -1;
+            }
+            throw new RuntimeException("mBaselineAlignedChildIndex of LinearLayout "
+                    + "points to a View that doesn't know how to get its baseline.");
+        }
+        int childTop = mBaselineChildTop;
+        if (getOrientation() == VERTICAL) {
+            final int majorGravity = mGravity & Gravity.VERTICAL_GRAVITY_MASK;
+            if (majorGravity != Gravity.TOP) {
+                switch (majorGravity) {
+                    case Gravity.BOTTOM:
+                        childTop = getBottom() - getTop() - getPaddingBottom() - mTotalLength;
+                        break;
+
+                    case Gravity.CENTER_VERTICAL:
+                        childTop += ((getBottom() - getTop() - getPaddingTop() - getPaddingBottom()) -
+                                mTotalLength) / 2;
+                        break;
+                }
+            }
+        }
+        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) child.getLayoutParams();
+        return childTop + lp.topMargin + childBaseline;
     }
 
     void measureVertical(int widthMeasureSpec, int heightMeasureSpec) {
@@ -886,21 +755,16 @@ public class LinearLayout extends android.widget.LinearLayout {
         int weightedMaxWidth = 0;
         boolean allFillParent = true;
         float totalWeight = 0;
-        final int count = getVirtualChildCount();
+        final int count = getChildCount();
         final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         boolean matchWidth = false;
-        final int baselineChildIndex = mBaselineAlignedChildIndex;
-        final boolean useLargestChild = mUseLargestChild;
+        final int baselineChildIndex = getBaselineAlignedChildIndex();
+        final boolean useLargestChild = isMeasureWithLargestChildEnabled();
         int largestChildHeight = Integer.MIN_VALUE;
         for (int i = 0; i < count; ++i) {
-            final View child = getVirtualChildAt(i);
-            if (child == null) {
-                mTotalLength += measureNullChild(i);
-                continue;
-            }
-            if (child.getVisibility() == View.GONE) {
-                i += getChildrenSkipCount(child, i);
+            final View child = getChildAt(i);
+            if (child == null || child.getVisibility() == View.GONE) {
                 continue;
             }
             if (hasDividerBeforeChildAt(i)) {
@@ -925,8 +789,7 @@ public class LinearLayout extends android.widget.LinearLayout {
                 }
                 final int childHeight = child.getMeasuredHeight();
                 final int totalLength = mTotalLength;
-                mTotalLength = Math.max(totalLength, totalLength + childHeight + lp.topMargin +
-                        lp.bottomMargin + getNextLocationOffset(child));
+                mTotalLength = Math.max(totalLength, totalLength + childHeight + lp.topMargin + lp.bottomMargin);
                 if (useLargestChild) {
                     largestChildHeight = Math.max(childHeight, largestChildHeight);
                 }
@@ -961,8 +824,6 @@ public class LinearLayout extends android.widget.LinearLayout {
                 alternativeMaxWidth = Math.max(alternativeMaxWidth,
                         matchWidthLocally ? margin : measuredWidth);
             }
-
-            i += getChildrenSkipCount(child, i);
         }
         if (mTotalLength > 0 && hasDividerBeforeChildAt(count)) {
             mTotalLength += mDividerHeight;
@@ -971,33 +832,28 @@ public class LinearLayout extends android.widget.LinearLayout {
                 (heightMode == MeasureSpec.AT_MOST || heightMode == MeasureSpec.UNSPECIFIED)) {
             mTotalLength = 0;
             for (int i = 0; i < count; ++i) {
-                final View child = getVirtualChildAt(i);
-                if (child == null) {
-                    mTotalLength += measureNullChild(i);
-                    continue;
-                }
-                if (child.getVisibility() == GONE) {
-                    i += getChildrenSkipCount(child, i);
+                final View child = getChildAt(i);
+                if (child == null || child.getVisibility() == GONE) {
                     continue;
                 }
                 final LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)
                         child.getLayoutParams();
                 final int totalLength = mTotalLength;
-                mTotalLength = Math.max(totalLength, totalLength + largestChildHeight +
-                        lp.topMargin + lp.bottomMargin + getNextLocationOffset(child));
+                mTotalLength = Math.max(totalLength, totalLength + largestChildHeight + lp.topMargin + lp.bottomMargin);
             }
         }
         mTotalLength += getPaddingTop() + getPaddingBottom();
         int heightSize = mTotalLength;
         heightSize = Math.max(heightSize, getSuggestedMinimumHeight());
-        int heightSizeAndState = resolveSizeAndState(heightSize, heightMeasureSpec, 0);
+        int heightSizeAndState = ViewCompat.resolveSizeAndState(heightSize, heightMeasureSpec, 0);
         heightSize = heightSizeAndState & MEASURED_SIZE_MASK;
         int delta = heightSize - mTotalLength;
         if (delta != 0 && totalWeight > 0.0f) {
-            float weightSum = mWeightSum > 0.0f ? mWeightSum : totalWeight;
+            final float f = getWeightSum();
+            float weightSum = f > 0.0f ? f : totalWeight;
             mTotalLength = 0;
             for (int i = 0; i < count; ++i) {
-                final View child = getVirtualChildAt(i);
+                final View child = getChildAt(i);
                 if (child.getVisibility() == View.GONE) {
                     continue;
                 }
@@ -1038,7 +894,7 @@ public class LinearLayout extends android.widget.LinearLayout {
                         && lp.width == android.view.ViewGroup.LayoutParams.MATCH_PARENT;
                 final int totalLength = mTotalLength;
                 mTotalLength = Math.max(totalLength, totalLength + child.getMeasuredHeight() +
-                        lp.topMargin + lp.bottomMargin + getNextLocationOffset(child));
+                        lp.topMargin + lp.bottomMargin);
             }
             mTotalLength += getPaddingTop() + getPaddingBottom();
         } else {
@@ -1046,7 +902,7 @@ public class LinearLayout extends android.widget.LinearLayout {
                     weightedMaxWidth);
             if (useLargestChild && heightMode != MeasureSpec.EXACTLY) {
                 for (int i = 0; i < count; i++) {
-                    final View child = getVirtualChildAt(i);
+                    final View child = getChildAt(i);
                     if (child == null || child.getVisibility() == View.GONE) {
                         continue;
                     }
@@ -1066,7 +922,7 @@ public class LinearLayout extends android.widget.LinearLayout {
         }
         maxWidth += getPaddingLeft() + getPaddingRight();
         maxWidth = Math.max(maxWidth, getSuggestedMinimumWidth());
-        setMeasuredDimension(resolveSizeAndState(maxWidth, widthMeasureSpec, childState),
+        setMeasuredDimension(ViewCompat.resolveSizeAndState(maxWidth, widthMeasureSpec, childState),
                 heightSizeAndState);
         if (matchWidth) {
             forceUniformWidth(count, heightMeasureSpec);
@@ -1078,7 +934,7 @@ public class LinearLayout extends android.widget.LinearLayout {
         if (mDivider == null) {
             return;
         }
-        if (mOrientation == VERTICAL) {
+        if (getOrientation() == VERTICAL) {
             drawDividersVertical(canvas);
         } else {
             drawDividersHorizontal(canvas);
@@ -1086,20 +942,8 @@ public class LinearLayout extends android.widget.LinearLayout {
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(LinearLayout.class.getName());
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(LinearLayout.class.getName());
-    }
-
-    @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        if (mOrientation == VERTICAL) {
+        if (getOrientation() == VERTICAL) {
             layoutVertical();
         } else {
             layoutHorizontal();
@@ -1108,65 +952,24 @@ public class LinearLayout extends android.widget.LinearLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (mOrientation == VERTICAL) {
+        if (getOrientation() == VERTICAL) {
             measureVertical(widthMeasureSpec, heightMeasureSpec);
         } else {
             measureHorizontal(widthMeasureSpec, heightMeasureSpec);
         }
     }
 
-    @Override
-    public void setBaselineAligned(boolean baselineAligned) {
-        mBaselineAligned = baselineAligned;
-    }
-
-    @Override
-    public void setBaselineAlignedChildIndex(int i) {
-        if (i < 0 || i >= getChildCount()) {
-            throw new IllegalArgumentException("base aligned child index out "
-                    + "of range (0, " + getChildCount() + ")");
-        }
-        mBaselineAlignedChildIndex = i;
-    }
-
     private void setChildFrame(View child, int left, int top, int width, int height) {
         child.layout(left, top, left + width, top + height);
     }
 
-    @Override
-    public void setDividerDrawable(Drawable divider) {
-        if (divider == mDivider) {
-            return;
-        }
-        mDivider = divider;
-        if (divider != null) {
-            mDividerWidth = divider.getIntrinsicWidth();
-            mDividerHeight = divider.getIntrinsicHeight();
-        } else {
-            mDividerWidth = 0;
-            mDividerHeight = 0;
-        }
-        setWillNotDraw(divider == null);
-        requestLayout();
-    }
-
-    @Override
-    public void setDividerPadding(int padding) {
-        mDividerPadding = padding;
+    public int getGravity() {
+        return mGravity;
     }
 
     @Override
     public void setGravity(int gravity) {
-        if (mGravity != gravity) {
-            if ((gravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) == 0) {
-                gravity |= Gravity.START;
-            }
-            if ((gravity & Gravity.VERTICAL_GRAVITY_MASK) == 0) {
-                gravity |= Gravity.TOP;
-            }
-            mGravity = gravity;
-            requestLayout();
-        }
+        super.setGravity(mGravity = gravity);
     }
 
     @Override
@@ -1179,38 +982,12 @@ public class LinearLayout extends android.widget.LinearLayout {
     }
 
     @Override
-    public void setMeasureWithLargestChildEnabled(boolean enabled) {
-        mUseLargestChild = enabled;
-    }
-
-    @Override
-    public void setOrientation(int orientation) {
-        if (mOrientation != orientation) {
-            mOrientation = orientation;
-            requestLayout();
-        }
-    }
-
-    @Override
-    public void setShowDividers(int showDividers) {
-        if (showDividers != mShowDividers) {
-            requestLayout();
-        }
-        mShowDividers = showDividers;
-    }
-
-    @Override
     public void setVerticalGravity(int verticalGravity) {
         final int gravity = verticalGravity & Gravity.VERTICAL_GRAVITY_MASK;
         if ((mGravity & Gravity.VERTICAL_GRAVITY_MASK) != gravity) {
             mGravity = mGravity & ~Gravity.VERTICAL_GRAVITY_MASK | gravity;
             requestLayout();
         }
-    }
-
-    @Override
-    public void setWeightSum(float weightSum) {
-        mWeightSum = Math.max(0.0f, weightSum);
     }
 
     @Override

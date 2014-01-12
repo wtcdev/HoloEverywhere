@@ -1,34 +1,48 @@
 {
     "attrs": [
         "listPreferredItemHeight$dimension",
+        "listPreferredItemHeightSmall$dimension",
         "alertDialogCenterButtons$boolean",
+        "alertDialogTitleDividerColor$reference|color",
         "buttonBarStyle$reference",
         "buttonBarButtonStyle$reference",
         "borderlessButtonStyle$reference",
         "segmentedButtonStyle$reference",
         "listPreferredItemHeightLarge$dimension",
         "dividerHorizontal$reference",
+        "dividerVertical$reference",
         "listDividerAlertDialog$reference",
         "alertDialogStyle$reference",
         "alertDialogTheme$reference",
         "dialogTheme$reference",
         "textColorAlertDialogListItem$reference",
         "spinnerStyle$reference",
+        "spinnerItemStyle$reference",
+        "spinnerDropDownItemStyle$reference",
         "numberPickerStyle$reference",
         "numberPickerUpButtonStyle$reference",
         "numberPickerDownButtonStyle$reference",
         "numberPickerInputTextStyle$reference",
-        "datePickerStyle$reference",
-        "timePickerStyle$reference",
         "autoCompleteTextViewStyle$reference",
-        "panelMenuListWidth$dimension",
         "textAppearanceListItem$reference",
+        "textAppearanceListItemSmall$reference",
         "detailsElementBackground$reference",
         "holoTheme/invalid 0/dark 1/light 2/mixed 3/preference 4",
         "preferenceTheme$reference/dark 1/light 2/mixed 3",
         "switchStyle$reference",
         "switchStyleOld$reference",
-        "calendarViewStyle$reference",
+        "popupWindowStyle$reference",
+        "activatedBackgroundIndicator$reference",
+        "windowActionModeOverlay$boolean",
+        "windowAnimationStyle$reference",
+        "windowContentOverlay$boolean",
+        "windowMinWidthMajor$reference",
+        "windowMinWidthMinor$reference",
+        "windowNoTitle$boolean",
+        "dateTimePickerSelectedDateBackground$reference|color",
+        "dateTimePickerTextColor$reference|color",
+        "dateTimePickerActiveTextColor$reference|color",
+        "dateTimePickerStyle$reference",
         {
             "enum": [
                 "top 0x30",
@@ -53,6 +67,11 @@
     ],
     "output": "values/attrs.xml",
     "styleable": {
+        "AbsListView": [
+            "android:choiceMode",
+            "android:fastScrollEnabled",
+            "android:fastScrollAlwaysVisible"
+        ],
         "AbsSpinner": "android:entries",
         "AlertDialog": [
             "fullDark$reference|color",
@@ -87,31 +106,21 @@
             "android:inputType",
             "android:entries"
         ],
-        "CalendarView": [
-            "firstDayOfWeek$integer",
-            "showWeekNumber$boolean",
-            "minDate$reference|string",
-            "maxDate$reference|string",
-            "shownWeekCount$integer",
-            "selectedWeekBackgroundColor$color|reference",
-            "focusedMonthDateColor$color|reference",
-            "unfocusedMonthDateColor$color|reference",
-            "weekNumberColor$color|reference",
-            "weekSeparatorLineColor$color|reference",
-            "selectedDateVerticalBar$reference",
-            "weekDayTextAppearance$reference",
-            "dateTextAppearance$reference"
-        ],
         "ColorDrawable": "android:color",
-        "DatePicker": [
-            "startYear$integer",
-            "endYear$integer",
-            "spinnersShown$boolean",
-            "calendarViewShown$boolean",
-            "minDate",
-            "maxDate",
-            "forceShownState$boolean",
-            "layout"
+        "DateTimePicker": [
+            "dateDayTextColor$reference|color",
+            "dateTodayColor$reference|color",
+            "dateMonthTitleColor$reference|color",
+            "dateCircleColor$reference|color",
+            "dateYearSelectorColor$reference|color",
+            "timeCircleColor$reference|color",
+            "timeCenterPointerColor$reference|color",
+            "timeCenterPointerRadius$reference|integer",
+            "timeRadialTextColor$reference|color",
+            "timeAmPmPicker$reference|color",
+            "timeAmPmPickerBackground$reference|color",
+            "timeAmPmPickerTextColor$reference|color",
+            "timePickerSelectorColor$reference|color"
         ],
         "Divider": "android:orientation",
         "ExpandableListView": [
@@ -149,9 +158,7 @@
             "android:measureWithLargestChild",
             "android:divider",
             "android:showDividers",
-            "android:dividerPadding",
-            "showDividers$flag/none 0/beginning 1/middle 2/end 4/all 7",
-            "dividerPadding$dimension"
+            "android:dividerPadding"
         ],
         "MenuView": [
             "android:itemTextAppearance",
@@ -236,10 +243,10 @@
             "android:textColorLink",
             "android:textStyle",
             "android:textColor",
-            "android:textAllCaps"
+            "android:textAllCaps",
+            "android:fontFamily"
         ],
-        "TextView": "textAllCaps$boolean/android:textAllCaps/android:text",
-        "TimePicker": "layout",
+        "TextView": "android:textAppearance",
         "WindowSizes": [
             "windowMinWidthMajor",
             "windowMinWidthMinor",

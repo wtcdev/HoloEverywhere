@@ -1,21 +1,6 @@
 
 package org.holoeverywhere.preference;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.holoeverywhere.ArrayAdapter;
-import org.holoeverywhere.LayoutInflater;
-import org.holoeverywhere.app.Fragment;
-import org.holoeverywhere.app.ListActivity;
-import org.holoeverywhere.util.XmlUtils;
-import org.holoeverywhere.widget.Button;
-import org.holoeverywhere.widget.ListView;
-import org.holoeverywhere.widget.TextView;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -41,6 +26,21 @@ import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+
+import org.holoeverywhere.LayoutInflater;
+import org.holoeverywhere.app.Fragment;
+import org.holoeverywhere.app.ListActivity;
+import org.holoeverywhere.util.XmlUtils;
+import org.holoeverywhere.widget.ArrayAdapter;
+import org.holoeverywhere.widget.Button;
+import org.holoeverywhere.widget.ListView;
+import org.holoeverywhere.widget.TextView;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class PreferenceActivity extends ListActivity implements
         PreferenceManager.OnPreferenceTreeClickListener,
@@ -221,9 +221,11 @@ public abstract class PreferenceActivity extends ListActivity implements
     private static final int MSG_BIND_PREFERENCES = 1;
     private static final int MSG_BUILD_HEADERS = 2;
     private static final String PREFERENCES_TAG = ":android:preferences";
+
     static {
         PreferenceInit.init();
     }
+
     private Header mCurHeader;
     private FragmentBreadCrumbs mFragmentBreadCrumbs;
     private Handler mHandler = new Handler() {
@@ -233,7 +235,7 @@ public abstract class PreferenceActivity extends ListActivity implements
                 case MSG_BIND_PREFERENCES: {
                     bindPreferences();
                 }
-                    break;
+                break;
                 case MSG_BUILD_HEADERS: {
                     ArrayList<Header> oldHeaders = new ArrayList<Header>(mHeaders);
                     mHeaders.clear();
@@ -256,22 +258,17 @@ public abstract class PreferenceActivity extends ListActivity implements
                         }
                     }
                 }
-                    break;
+                break;
             }
         }
     };
     private final ArrayList<Header> mHeaders = new ArrayList<Header>();
     private FrameLayout mListFooter;
     private Button mNextButton;
-
     private PreferenceManager mPreferenceManager;
-
     private ViewGroup mPrefsContainer;
-
     private Bundle mSavedInstanceState;
-
     private boolean mSinglePane;
-
     private Context mThemedContext;
 
     @Deprecated
@@ -361,7 +358,7 @@ public abstract class PreferenceActivity extends ListActivity implements
     }
 
     public void finishPreferencePanel(Fragment caller, int resultCode,
-            Intent resultData) {
+                                      Intent resultData) {
         if (mSinglePane) {
             setResult(resultCode, resultData);
             finish();
@@ -398,11 +395,16 @@ public abstract class PreferenceActivity extends ListActivity implements
         return null;
     }
 
-    protected Context getThemedContext() {
+    public Context getThemedContext() {
         if (mThemedContext == null) {
             mThemedContext = PreferenceInit.context(this);
         }
         return mThemedContext;
+    }
+
+    @Override
+    public LayoutInflater getThemedLayoutInflater() {
+        return LayoutInflater.from(getThemedContext());
     }
 
     public boolean hasHeaders() {
@@ -454,10 +456,10 @@ public abstract class PreferenceActivity extends ListActivity implements
                     TypedArray sa = getResources().obtainAttributes(attrs,
                             R.styleable.PreferenceHeader);
                     header.id = sa.getResourceId(
-                            R.styleable.PreferenceHeader_id,
+                            R.styleable.PreferenceHeader_android_id,
                             (int) PreferenceActivity.HEADER_ID_UNDEFINED);
                     TypedValue tv = sa
-                            .peekValue(R.styleable.PreferenceHeader_title);
+                            .peekValue(R.styleable.PreferenceHeader_android_title);
                     if (tv != null && tv.type == TypedValue.TYPE_STRING) {
                         if (tv.resourceId != 0) {
                             header.titleRes = tv.resourceId;
@@ -465,7 +467,7 @@ public abstract class PreferenceActivity extends ListActivity implements
                             header.title = tv.string;
                         }
                     }
-                    tv = sa.peekValue(R.styleable.PreferenceHeader_summary);
+                    tv = sa.peekValue(R.styleable.PreferenceHeader_android_summary);
                     if (tv != null && tv.type == TypedValue.TYPE_STRING) {
                         if (tv.resourceId != 0) {
                             header.summaryRes = tv.resourceId;
@@ -473,7 +475,7 @@ public abstract class PreferenceActivity extends ListActivity implements
                             header.summary = tv.string;
                         }
                     }
-                    tv = sa.peekValue(R.styleable.PreferenceHeader_breadCrumbTitle);
+                    tv = sa.peekValue(R.styleable.PreferenceHeader_android_breadCrumbTitle);
                     if (tv != null && tv.type == TypedValue.TYPE_STRING) {
                         if (tv.resourceId != 0) {
                             header.breadCrumbTitleRes = tv.resourceId;
@@ -481,7 +483,7 @@ public abstract class PreferenceActivity extends ListActivity implements
                             header.breadCrumbTitle = tv.string;
                         }
                     }
-                    tv = sa.peekValue(R.styleable.PreferenceHeader_breadCrumbShortTitle);
+                    tv = sa.peekValue(R.styleable.PreferenceHeader_android_breadCrumbShortTitle);
                     if (tv != null && tv.type == TypedValue.TYPE_STRING) {
                         if (tv.resourceId != 0) {
                             header.breadCrumbShortTitleRes = tv.resourceId;
@@ -490,9 +492,9 @@ public abstract class PreferenceActivity extends ListActivity implements
                         }
                     }
                     header.iconRes = sa.getResourceId(
-                            R.styleable.PreferenceHeader_icon, 0);
+                            R.styleable.PreferenceHeader_android_icon, 0);
                     header.fragment = sa
-                            .getString(R.styleable.PreferenceHeader_fragment);
+                            .getString(R.styleable.PreferenceHeader_android_fragment);
                     sa.recycle();
                     if (curBundle == null) {
                         curBundle = new Bundle();
@@ -500,7 +502,7 @@ public abstract class PreferenceActivity extends ListActivity implements
                     final int innerDepth = parser.getDepth();
                     while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                             && (type != XmlPullParser.END_TAG || parser
-                                    .getDepth() > innerDepth)) {
+                            .getDepth() > innerDepth)) {
                         if (type == XmlPullParser.END_TAG
                                 || type == XmlPullParser.TEXT) {
                             continue;
@@ -550,7 +552,7 @@ public abstract class PreferenceActivity extends ListActivity implements
     }
 
     public Intent onBuildStartFragmentIntent(String fragmentName, Bundle args,
-            int titleRes, int shortTitleRes) {
+                                             int titleRes, int shortTitleRes) {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.setClass(this, getClass());
         intent.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT, fragmentName);
@@ -563,8 +565,8 @@ public abstract class PreferenceActivity extends ListActivity implements
     }
 
     @Override
-    public void onContentChanged() {
-        super.onContentChanged();
+    public void onSupportContentChanged() {
+        super.onSupportContentChanged();
         if (mPreferenceManager != null) {
             postBindPreferences();
         }
@@ -706,6 +708,7 @@ public abstract class PreferenceActivity extends ListActivity implements
         super.onDestroy();
         if (mPreferenceManager != null) {
             mPreferenceManager.dispatchActivityDestroy();
+            mPreferenceManager.setOnPreferenceTreeClickListener(null);
         }
     }
 
@@ -767,7 +770,7 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     @Override
     public boolean onPreferenceStartFragment(PreferenceFragment caller,
-            Preference pref) {
+                                             Preference pref) {
         startPreferencePanel(pref.getFragment(), pref.getExtras(),
                 pref.getTitleRes(), pref.getTitle(), null, 0);
         return true;
@@ -776,7 +779,7 @@ public abstract class PreferenceActivity extends ListActivity implements
     @Override
     @Deprecated
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen,
-            Preference preference) {
+                                         Preference preference) {
         return false;
     }
 
@@ -848,11 +851,6 @@ public abstract class PreferenceActivity extends ListActivity implements
         }
     }
 
-    @Override
-    public void setContentView(int layoutResId) {
-        setContentView(LayoutInflater.inflate(getThemedContext(), layoutResId));
-    }
-
     public void setListFooter(View view) {
         mListFooter.removeAllViews();
         mListFooter.addView(view, new FrameLayout.LayoutParams(
@@ -860,7 +858,7 @@ public abstract class PreferenceActivity extends ListActivity implements
     }
 
     public void setParentTitle(CharSequence title, CharSequence shortTitle,
-            OnClickListener listener) {
+                               OnClickListener listener) {
         if (mFragmentBreadCrumbs != null) {
             mFragmentBreadCrumbs.setParentTitle(title, shortTitle, listener);
         }
@@ -943,8 +941,8 @@ public abstract class PreferenceActivity extends ListActivity implements
     }
 
     public void startPreferencePanel(String fragmentClass, Bundle args,
-            int titleRes, CharSequence titleText, Fragment resultTo,
-            int resultRequestCode) {
+                                     int titleRes, CharSequence titleText, Fragment resultTo,
+                                     int resultRequestCode) {
         if (mSinglePane) {
             startWithFragment(fragmentClass, args, resultTo, resultRequestCode,
                     titleRes, 0);
@@ -970,13 +968,13 @@ public abstract class PreferenceActivity extends ListActivity implements
     }
 
     public void startWithFragment(String fragmentName, Bundle args,
-            Fragment resultTo, int resultRequestCode) {
+                                  Fragment resultTo, int resultRequestCode) {
         startWithFragment(fragmentName, args, resultTo, resultRequestCode, 0, 0);
     }
 
     public void startWithFragment(String fragmentName, Bundle args,
-            Fragment resultTo, int resultRequestCode, int titleRes,
-            int shortTitleRes) {
+                                  Fragment resultTo, int resultRequestCode, int titleRes,
+                                  int shortTitleRes) {
         Intent intent = onBuildStartFragmentIntent(fragmentName, args,
                 titleRes, shortTitleRes);
         if (resultTo == null) {
@@ -1006,7 +1004,7 @@ public abstract class PreferenceActivity extends ListActivity implements
     }
 
     private void switchToHeaderInner(String fragmentName, Bundle args,
-            int direction) {
+                                     int direction) {
         getSupportFragmentManager().popBackStack(
                 PreferenceActivity.BACK_STACK_PREFS,
                 FragmentManager.POP_BACK_STACK_INCLUSIVE);

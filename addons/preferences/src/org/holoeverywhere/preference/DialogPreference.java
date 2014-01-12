@@ -1,9 +1,6 @@
 
 package org.holoeverywhere.preference;
 
-import org.holoeverywhere.LayoutInflater;
-import org.holoeverywhere.app.AlertDialog;
-
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,43 +17,25 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
+import org.holoeverywhere.LayoutInflater;
+import org.holoeverywhere.app.AlertDialog;
+import org.holoeverywhere.app.ContextThemeWrapperPlus;
+
 public abstract class DialogPreference extends Preference implements
         DialogInterface.OnClickListener, DialogInterface.OnDismissListener,
         PreferenceManager.OnActivityDestroyListener {
-    private static class SavedState extends BaseSavedState {
-        Bundle dialogBundle;
-        boolean isDialogShowing;
-
-        public SavedState(Parcel source) {
-            super(source);
-            isDialogShowing = source.readInt() == 1;
-            dialogBundle = source.readBundle();
-        }
-
-        public SavedState(Parcelable superState) {
-            super(superState);
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            super.writeToParcel(dest, flags);
-            dest.writeInt(isDialogShowing ? 1 : 0);
-            dest.writeBundle(dialogBundle);
-        }
-    }
-
     private AlertDialog.Builder mBuilder;
     private Dialog mDialog;
+    private Context mDialogContext;
     private Drawable mDialogIcon;
     private int mDialogLayoutResId;
     private CharSequence mDialogMessage;
     private CharSequence mDialogTitle;
     private InputMethodManager mInputMethodManager;
     private CharSequence mNegativeButtonText;
-
     private CharSequence mPositiveButtonText;
-
     private int mWhichButtonClicked;
+    private boolean mForceNotSaveState = false;
 
     public DialogPreference(Context context) {
         this(context, null);
@@ -71,19 +50,19 @@ public abstract class DialogPreference extends Preference implements
         context = getContext();
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.DialogPreference, defStyle, R.style.Holo_PreferenceDialog);
-        mDialogTitle = a.getString(R.styleable.DialogPreference_dialogTitle);
+        mDialogTitle = a.getString(R.styleable.DialogPreference_android_dialogTitle);
         if (mDialogTitle == null) {
             mDialogTitle = getTitle();
         }
         mDialogMessage = a
-                .getString(R.styleable.DialogPreference_dialogMessage);
-        mDialogIcon = a.getDrawable(R.styleable.DialogPreference_dialogIcon);
+                .getString(R.styleable.DialogPreference_android_dialogMessage);
+        mDialogIcon = a.getDrawable(R.styleable.DialogPreference_android_dialogIcon);
         mPositiveButtonText = a
-                .getString(R.styleable.DialogPreference_positiveButtonText);
+                .getString(R.styleable.DialogPreference_android_positiveButtonText);
         mNegativeButtonText = a
-                .getString(R.styleable.DialogPreference_negativeButtonText);
+                .getString(R.styleable.DialogPreference_android_negativeButtonText);
         mDialogLayoutResId = a.getResourceId(
-                R.styleable.DialogPreference_dialogLayout, mDialogLayoutResId);
+                R.styleable.DialogPreference_android_dialogLayout, mDialogLayoutResId);
         a.recycle();
 
     }
@@ -92,28 +71,84 @@ public abstract class DialogPreference extends Preference implements
         return mDialog;
     }
 
+    protected Context getDialogContext(boolean alert) {
+        if (mDialogContext != null) {
+            return mDialogContext;
+        }
+        final TypedArray a = getContext().obtainStyledAttributes(new int[]{
+                alert ? R.attr.alertDialogTheme : R.attr.dialogTheme
+        });
+        final int theme = a.getResourceId(0, R.style.Holo_Theme_Dialog_Alert);
+        a.recycle();
+        return mDialogContext = new ContextThemeWrapperPlus(getContext(), theme);
+    }
+
     public Drawable getDialogIcon() {
         return mDialogIcon;
+    }
+
+    public void setDialogIcon(Drawable dialogIcon) {
+        mDialogIcon = dialogIcon;
+    }
+
+    public void setDialogIcon(int dialogIconRes) {
+        mDialogIcon = getContext().getResources().getDrawable(dialogIconRes);
     }
 
     public int getDialogLayoutResource() {
         return mDialogLayoutResId;
     }
 
+    public void setDialogLayoutResource(int dialogLayoutResId) {
+        mDialogLayoutResId = dialogLayoutResId;
+    }
+
     public CharSequence getDialogMessage() {
         return mDialogMessage;
+    }
+
+    public void setDialogMessage(CharSequence dialogMessage) {
+        mDialogMessage = dialogMessage;
+    }
+
+    public void setDialogMessage(int dialogMessageResId) {
+        setDialogMessage(getContext().getString(dialogMessageResId));
     }
 
     public CharSequence getDialogTitle() {
         return mDialogTitle;
     }
 
+    public void setDialogTitle(CharSequence dialogTitle) {
+        mDialogTitle = dialogTitle;
+    }
+
+    public void setDialogTitle(int dialogTitleResId) {
+        setDialogTitle(getContext().getString(dialogTitleResId));
+    }
+
     public CharSequence getNegativeButtonText() {
         return mNegativeButtonText;
     }
 
+    public void setNegativeButtonText(CharSequence negativeButtonText) {
+        mNegativeButtonText = negativeButtonText;
+    }
+
+    public void setNegativeButtonText(int negativeButtonTextResId) {
+        setNegativeButtonText(getContext().getString(negativeButtonTextResId));
+    }
+
     public CharSequence getPositiveButtonText() {
         return mPositiveButtonText;
+    }
+
+    public void setPositiveButtonText(CharSequence positiveButtonText) {
+        mPositiveButtonText = positiveButtonText;
+    }
+
+    public void setPositiveButtonText(int positiveButtonTextResId) {
+        setPositiveButtonText(getContext().getString(positiveButtonTextResId));
     }
 
     protected boolean needInputMethod() {
@@ -122,11 +157,9 @@ public abstract class DialogPreference extends Preference implements
 
     @Override
     public void onActivityDestroy() {
-
         if (mDialog == null || !mDialog.isShowing()) {
             return;
         }
-
         mDialog.dismiss();
     }
 
@@ -161,7 +194,9 @@ public abstract class DialogPreference extends Preference implements
     }
 
     protected Dialog onCreateDialog(Context context) {
-        mBuilder = new AlertDialog.Builder(context);
+        context = getDialogContext(true);
+        mBuilder = new AlertDialog.Builder(context,
+                ((ContextThemeWrapperPlus) context).getThemeResource());
         mBuilder.setTitle(mDialogTitle);
         mBuilder.setIcon(mDialogIcon);
         mBuilder.setPositiveButton(mPositiveButtonText, this);
@@ -233,7 +268,7 @@ public abstract class DialogPreference extends Preference implements
     @Override
     protected Parcelable onSaveInstanceState() {
         final Parcelable superState = super.onSaveInstanceState();
-        if (mDialog == null || !mDialog.isShowing()) {
+        if (mDialog == null || !mDialog.isShowing() || mForceNotSaveState) {
             return superState;
         }
         final SavedState myState = new SavedState(superState);
@@ -242,53 +277,17 @@ public abstract class DialogPreference extends Preference implements
         return myState;
     }
 
+    public boolean isForceNotSaveState() {
+        return mForceNotSaveState;
+    }
+
+    public void setForceNotSaveState(boolean forceNotSaveState) {
+        mForceNotSaveState = forceNotSaveState;
+    }
+
     private void requestInputMethod(Dialog dialog) {
         Window window = dialog.getWindow();
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-    }
-
-    public void setDialogIcon(Drawable dialogIcon) {
-        mDialogIcon = dialogIcon;
-    }
-
-    public void setDialogIcon(int dialogIconRes) {
-        mDialogIcon = getContext().getResources().getDrawable(dialogIconRes);
-    }
-
-    public void setDialogLayoutResource(int dialogLayoutResId) {
-        mDialogLayoutResId = dialogLayoutResId;
-    }
-
-    public void setDialogMessage(CharSequence dialogMessage) {
-        mDialogMessage = dialogMessage;
-    }
-
-    public void setDialogMessage(int dialogMessageResId) {
-        setDialogMessage(getContext().getString(dialogMessageResId));
-    }
-
-    public void setDialogTitle(CharSequence dialogTitle) {
-        mDialogTitle = dialogTitle;
-    }
-
-    public void setDialogTitle(int dialogTitleResId) {
-        setDialogTitle(getContext().getString(dialogTitleResId));
-    }
-
-    public void setNegativeButtonText(CharSequence negativeButtonText) {
-        mNegativeButtonText = negativeButtonText;
-    }
-
-    public void setNegativeButtonText(int negativeButtonTextResId) {
-        setNegativeButtonText(getContext().getString(negativeButtonTextResId));
-    }
-
-    public void setPositiveButtonText(CharSequence positiveButtonText) {
-        mPositiveButtonText = positiveButtonText;
-    }
-
-    public void setPositiveButtonText(int positiveButtonTextResId) {
-        setPositiveButtonText(getContext().getString(positiveButtonTextResId));
     }
 
     protected void showDialog(Bundle state) {
@@ -303,5 +302,27 @@ public abstract class DialogPreference extends Preference implements
         }
         mDialog.setOnDismissListener(this);
         mDialog.show();
+    }
+
+    private static class SavedState extends BaseSavedState {
+        Bundle dialogBundle;
+        boolean isDialogShowing;
+
+        public SavedState(Parcel source) {
+            super(source);
+            isDialogShowing = source.readInt() == 1;
+            dialogBundle = source.readBundle();
+        }
+
+        public SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeInt(isDialogShowing ? 1 : 0);
+            dest.writeBundle(dialogBundle);
+        }
     }
 }

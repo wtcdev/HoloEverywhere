@@ -1,11 +1,11 @@
 
 package org.holoeverywhere.demo.widget;
 
-import org.holoeverywhere.FontLoader;
-import org.holoeverywhere.demo.R;
-
 import android.view.View;
 import android.view.ViewGroup;
+
+import org.holoeverywhere.FontLoader;
+import org.holoeverywhere.demo.R;
 
 public class DemoItem {
     public CharSequence label;
@@ -38,7 +38,7 @@ public class DemoItem {
 
     protected DemoListRowView makeView(View convertView, ViewGroup parent) {
         if (convertView == null) {
-            return FontLoader.apply(new DemoListRowView(parent.getContext()));
+            return FontLoader.applyDefaultFont(new DemoListRowView(parent.getContext()));
         } else {
             return (DemoListRowView) convertView;
         }

@@ -1,17 +1,17 @@
 
 package org.holoeverywhere.preference;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.holoeverywhere.internal.GenericInflater;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+
+import org.holoeverywhere.app.GenericInflater;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public abstract class PreferenceGroup extends Preference implements
         GenericInflater.Parent<Preference> {
@@ -31,7 +31,7 @@ public abstract class PreferenceGroup extends Preference implements
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.PreferenceGroup, defStyle, 0);
         mOrderingAsAdded = a.getBoolean(
-                R.styleable.PreferenceGroup_orderingFromXml, mOrderingAsAdded);
+                R.styleable.PreferenceGroup_android_orderingFromXml, mOrderingAsAdded);
         a.recycle();
     }
 
@@ -167,6 +167,10 @@ public abstract class PreferenceGroup extends Preference implements
         return mOrderingAsAdded;
     }
 
+    public void setOrderingAsAdded(boolean orderingAsAdded) {
+        mOrderingAsAdded = orderingAsAdded;
+    }
+
     @Override
     protected void onAttachedToActivity() {
         super.onAttachedToActivity();
@@ -221,10 +225,6 @@ public abstract class PreferenceGroup extends Preference implements
         for (int i = 0; i < preferenceCount; i++) {
             getPreference(i).setEnabled(enabled);
         }
-    }
-
-    public void setOrderingAsAdded(boolean orderingAsAdded) {
-        mOrderingAsAdded = orderingAsAdded;
     }
 
     void sortPreferences() {

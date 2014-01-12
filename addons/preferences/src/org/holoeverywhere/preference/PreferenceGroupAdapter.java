@@ -1,12 +1,6 @@
 
 package org.holoeverywhere.preference;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.holoeverywhere.preference.Preference.OnPreferenceChangeInternalListener;
-
 import android.os.Handler;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,33 +8,14 @@ import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 
+import org.holoeverywhere.preference.Preference.OnPreferenceChangeInternalListener;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 class PreferenceGroupAdapter extends BaseAdapter implements
         OnPreferenceChangeInternalListener {
-    private static class PreferenceLayout implements
-            Comparable<PreferenceLayout> {
-        private String name;
-        private int resId;
-        private int widgetResId;
-
-        @Override
-        public int compareTo(PreferenceLayout other) {
-            int compareNames = name.compareTo(other.name);
-            if (compareNames == 0) {
-                if (resId == other.resId) {
-                    if (widgetResId == other.widgetResId) {
-                        return 0;
-                    } else {
-                        return widgetResId - other.widgetResId;
-                    }
-                } else {
-                    return resId - other.resId;
-                }
-            } else {
-                return compareNames;
-            }
-        }
-    }
-
     private Handler mHandler = new Handler();
     private boolean mHasReturnedViewTypeCount = false;
     private volatile boolean mIsSyncing = false;
@@ -53,12 +28,11 @@ class PreferenceGroupAdapter extends BaseAdapter implements
             syncMyPreferences();
         }
     };
-
     private PreferenceLayout mTempPreferenceLayout = new PreferenceLayout();
 
     public PreferenceGroupAdapter(PreferenceGroup preferenceGroup) {
         mPreferenceGroup = preferenceGroup;
-        mPreferenceGroup.setOnPreferenceChangeInternalListener(this);
+        mPreferenceGroup.addOnPreferenceChangeInternalListener(this);
         int c = preferenceGroup.getPreferenceCount();
         mPreferenceList = new ArrayList<Preference>(c);
         mPreferenceLayouts = new ArrayList<PreferenceLayout>(c);
@@ -80,7 +54,7 @@ class PreferenceGroupAdapter extends BaseAdapter implements
     }
 
     private PreferenceLayout createPreferenceLayout(Preference preference,
-            PreferenceLayout in) {
+                                                    PreferenceLayout in) {
         PreferenceLayout pl = in != null ? in : new PreferenceLayout();
         pl.name = preference.getClass().getName();
         pl.resId = preference.getLayoutResource();
@@ -89,7 +63,7 @@ class PreferenceGroupAdapter extends BaseAdapter implements
     }
 
     private void flattenPreferenceGroup(List<Preference> preferences,
-            PreferenceGroup group) {
+                                        PreferenceGroup group) {
         group.sortPreferences();
         final int groupSize = group.getPreferenceCount();
         for (int i = 0; i < groupSize; i++) {
@@ -104,7 +78,7 @@ class PreferenceGroupAdapter extends BaseAdapter implements
                     flattenPreferenceGroup(preferences, preferenceAsGroup);
                 }
             }
-            preference.setOnPreferenceChangeInternalListener(this);
+            preference.addOnPreferenceChangeInternalListener(this);
         }
     }
 
@@ -207,6 +181,31 @@ class PreferenceGroupAdapter extends BaseAdapter implements
         synchronized (this) {
             mIsSyncing = false;
             notifyAll();
+        }
+    }
+
+    private static class PreferenceLayout implements
+            Comparable<PreferenceLayout> {
+        private String name;
+        private int resId;
+        private int widgetResId;
+
+        @Override
+        public int compareTo(PreferenceLayout other) {
+            int compareNames = name.compareTo(other.name);
+            if (compareNames == 0) {
+                if (resId == other.resId) {
+                    if (widgetResId == other.widgetResId) {
+                        return 0;
+                    } else {
+                        return widgetResId - other.widgetResId;
+                    }
+                } else {
+                    return resId - other.resId;
+                }
+            } else {
+                return compareNames;
+            }
         }
     }
 }

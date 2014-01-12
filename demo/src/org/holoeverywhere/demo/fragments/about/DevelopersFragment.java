@@ -1,22 +1,23 @@
 
 package org.holoeverywhere.demo.fragments.about;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.holoeverywhere.ArrayAdapter;
-import org.holoeverywhere.app.ListFragment;
-import org.holoeverywhere.demo.R;
-import org.holoeverywhere.widget.AdapterView;
-import org.holoeverywhere.widget.AdapterView.OnItemClickListener;
-import org.holoeverywhere.widget.Spinner;
-import org.holoeverywhere.widget.TextView;
-
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+
+import org.holoeverywhere.app.ListFragment;
+import org.holoeverywhere.content.IntentCompat;
+import org.holoeverywhere.demo.R;
+import org.holoeverywhere.widget.AdapterView;
+import org.holoeverywhere.widget.AdapterView.OnItemClickListener;
+import org.holoeverywhere.widget.ArrayAdapter;
+import org.holoeverywhere.widget.Spinner;
+import org.holoeverywhere.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DevelopersFragment extends ListFragment {
     private static final class Developer {
@@ -113,11 +114,11 @@ public class DevelopersFragment extends ListFragment {
         public void onClick() {
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("message/rfc822");
-            intent.putExtra(Intent.EXTRA_EMAIL, new String[] {
+            intent.putExtra(Intent.EXTRA_EMAIL, new String[]{
                     to
             });
             intent.putExtra(Intent.EXTRA_SUBJECT, subject);
-            intent = Intent.createChooser(intent, getText(R.string.select_email_programm));
+            intent = IntentCompat.createChooser(intent, getText(R.string.select_email_programm));
             if (intent != null) {
                 getActivity().startActivity(intent);
             }
@@ -155,7 +156,7 @@ public class DevelopersFragment extends ListFragment {
         @Override
         public void onClick() {
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            intent = Intent.createChooser(intent, getText(R.string.select_browser));
+            intent = IntentCompat.createChooser(intent, getText(R.string.select_browser));
             if (intent != null) {
                 getActivity().startActivity(intent);
             }

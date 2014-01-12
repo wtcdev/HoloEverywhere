@@ -1,24 +1,21 @@
 
 package org.holoeverywhere.demo.fragments.lists;
 
-import org.holoeverywhere.ArrayAdapter;
-import org.holoeverywhere.demo.DemoActivity;
+import android.annotation.SuppressLint;
+import android.os.Bundle;
+import android.support.v7.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+
 import org.holoeverywhere.demo.R;
-import org.holoeverywhere.demo.fragments.MenuFragment.OnMenuClickListener;
+import org.holoeverywhere.widget.ArrayAdapter;
 import org.holoeverywhere.widget.ListView;
 import org.holoeverywhere.widget.ListView.MultiChoiceModeListener;
 
-import android.os.Bundle;
-import android.view.View;
-
-import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
-
 public class ListsChoiceModeModalFragment extends ListsBaseFragment implements
-        MultiChoiceModeListener, OnMenuClickListener {
+        MultiChoiceModeListener {
     private ActionMode mLastActionMode;
-    private DemoActivity mLastActivity;
     private ListView mList;
 
     @Override
@@ -43,12 +40,6 @@ public class ListsChoiceModeModalFragment extends ListsBaseFragment implements
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        (mLastActivity = (DemoActivity) getSupportActivity()).setOnMenuClickListener(this);
-    }
-
-    @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
         mLastActionMode = mode;
         mode.setTitle(R.string.library_name);
@@ -58,30 +49,22 @@ public class ListsChoiceModeModalFragment extends ListsBaseFragment implements
     }
 
     @Override
+    public void onDestroy() {
+        if (mLastActionMode != null) {
+            mLastActionMode.finish();
+            mLastActionMode = null;
+        }
+        super.onDestroy();
+    }
+
+    @Override
     public void onDestroyActionMode(ActionMode mode) {
         mLastActionMode = null;
     }
 
     @Override
-    public void onDetach() {
-        if (mLastActivity != null) {
-            mLastActivity.setOnMenuClickListener(null);
-            mLastActivity = null;
-        }
-        super.onDetach();
-    }
-
-    @Override
     public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
         updateSubtitle(mLastActionMode = mode);
-    }
-
-    @Override
-    public void onMenuClick(int position) {
-        if (mLastActionMode != null) {
-            mLastActionMode.finish();
-            mLastActionMode = null;
-        }
     }
 
     @Override
@@ -96,10 +79,11 @@ public class ListsChoiceModeModalFragment extends ListsBaseFragment implements
         mList = getListView();
         mList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         mList.setMultiChoiceModeListener(this);
-        setListAdapter(ArrayAdapter.createFromResource(getActivity(), R.array.adjectives,
+        setListAdapter(ArrayAdapter.createFromResource(getActivity(), R.array.some_words,
                 R.layout.simple_list_item_multiple_choice));
     }
 
+    @SuppressLint("NewApi")
     private void updateSubtitle(ActionMode mode) {
         mode.setSubtitle("Checked: " + mList.getCheckedItemCount());
     }

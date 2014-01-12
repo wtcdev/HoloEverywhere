@@ -1,24 +1,24 @@
 
 package org.holoeverywhere.demo.fragments;
 
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+
 import org.holoeverywhere.app.Activity;
 import org.holoeverywhere.app.DialogFragment;
 import org.holoeverywhere.app.Fragment;
 import org.holoeverywhere.app.ListFragment;
 import org.holoeverywhere.demo.DemoActivity;
-import org.holoeverywhere.demo.DemoTabsActivity;
 import org.holoeverywhere.demo.fragments.dialogs.DialogsFragment;
 import org.holoeverywhere.demo.fragments.lists.ListsFragment;
 import org.holoeverywhere.demo.fragments.menus.MenusFragments;
 import org.holoeverywhere.demo.fragments.pickers.PickersFragment;
+import org.holoeverywhere.demo.fragments.tabber.TabsFragment;
 import org.holoeverywhere.demo.widget.DemoAdapter;
 import org.holoeverywhere.demo.widget.DemoItem;
 import org.holoeverywhere.widget.ListView;
-
-import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.View;
 
 public class OtherFragment extends ListFragment {
     private final class ActivityListener implements OnOtherItemClickListener {
@@ -51,8 +51,8 @@ public class OtherFragment extends ListFragment {
             if (fragment instanceof DialogFragment) {
                 ((DialogFragment) fragment).show(getSupportActivity());
             } else {
-                ((DemoActivity) getSupportActivity()).replaceFragment(fragment,
-                        "fragment-" + mClass.getName());
+                ((DemoActivity) getSupportActivity()).addonSlider()
+                        .obtainSliderMenu().replaceFragment(fragment);
             }
         }
     }
@@ -105,7 +105,7 @@ public class OtherFragment extends ListFragment {
     }
 
     private void addItem(CharSequence label, OnOtherItemClickListener listener,
-            boolean longClickable) {
+                         boolean longClickable) {
         OtherItem item = new OtherItem();
         item.label = label;
         item.listener = listener;
@@ -134,8 +134,8 @@ public class OtherFragment extends ListFragment {
         addItem("Dialogs", DialogsFragment.class);
         addItem("Pickers", PickersFragment.class);
         addItem("Menus", MenusFragments.class);
-        addItem("Calendar", CalendarFragment.class);
-        addItemActivity("Tabs + Swipe", DemoTabsActivity.class);
+        addItem("Font Palette", FontPalette.class);
+        addItem("Addon: Tabber", TabsFragment.class);
     }
 
     protected void onPrepareListView(ListView list) {

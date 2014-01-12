@@ -1,28 +1,19 @@
 
 package org.holoeverywhere.addon;
 
-import java.util.Map;
-import java.util.WeakHashMap;
+import android.content.Context;
 
 import org.holoeverywhere.ThemeManager;
 import org.holoeverywhere.ThemeManager.ThemeSetter;
 import org.holoeverywhere.app.ContextThemeWrapperPlus;
+import org.holoeverywhere.util.WeaklyMap;
 
-import android.content.Context;
+import java.util.Map;
 
+/**
+ * Helper for handling custom themes for required parts of library, like view themes in preferences addon
+ */
 public class IAddonThemes implements ThemeSetter {
-    private static final class AddonThemeWrapper extends ContextThemeWrapperPlus {
-        public AddonThemeWrapper(Context base, int themeres) {
-            super(base, themeres);
-        }
-    }
-
-    public interface ThemeResolver {
-        public int resolveThemeForContext(Context context, int invalidTheme);
-    }
-
-    private Map<Context, AddonThemeWrapper> mContexts;
-    private int mDarkTheme = -1;
     private final ThemeResolver mDefaultThemeResolver = new ThemeResolver() {
         @Override
         public int resolveThemeForContext(Context context, int invalidTheme) {
@@ -37,16 +28,27 @@ public class IAddonThemes implements ThemeSetter {
             return ThemeManager.getThemeResource(theme, false);
         }
     };
-
-    private int mLightTheme = -1;
-
-    private int mMixedTheme = -1;
-
     private final int mThemeFlag;
+    private Map<Context, AddonThemeWrapper> mContexts;
+    private int mDarkTheme = -1;
+    private int mLightTheme = -1;
+    private int mMixedTheme = -1;
 
     public IAddonThemes() {
         mThemeFlag = ThemeManager.makeNewFlag();
         ThemeManager.registerThemeSetter(this);
+    }
+
+    public int getTheme(int themeType) {
+        if (themeType == ThemeManager.DARK) {
+            return mDarkTheme;
+        } else if (themeType == ThemeManager.LIGHT) {
+            return mLightTheme;
+        } else if (themeType == ThemeManager.MIXED) {
+            return mMixedTheme;
+        } else {
+            return 0;
+        }
     }
 
     public Context context(Context context) {
@@ -63,16 +65,16 @@ public class IAddonThemes implements ThemeSetter {
         }
         AddonThemeWrapper wrapper = null;
         if (mContexts != null) {
-            mContexts.get(context);
+            wrapper = mContexts.get(context);
         }
         if (wrapper == null) {
             final int theme = themeResolver.resolveThemeForContext(context, invalidTheme);
-            if (theme <= 0) {
+            if (theme == 0) {
                 return null;
             }
             wrapper = new AddonThemeWrapper(context, theme);
             if (mContexts == null) {
-                mContexts = new WeakHashMap<Context, AddonThemeWrapper>();
+                mContexts = new WeaklyMap<Context, AddonThemeWrapper>();
             }
             mContexts.put(context, wrapper);
         }
@@ -83,12 +85,27 @@ public class IAddonThemes implements ThemeSetter {
         return mDarkTheme;
     }
 
+    public void setDarkTheme(int darkTheme) {
+        mDarkTheme = darkTheme;
+        setupThemes();
+    }
+
     public int getLightTheme() {
         return mLightTheme;
     }
 
+    public void setLightTheme(int lightTheme) {
+        mLightTheme = lightTheme;
+        setupThemes();
+    }
+
     public int getMixedTheme() {
         return mMixedTheme;
+    }
+
+    public void setMixedTheme(int mixedTheme) {
+        mMixedTheme = mixedTheme;
+        setupThemes();
     }
 
     public int getThemeFlag() {
@@ -98,21 +115,6 @@ public class IAddonThemes implements ThemeSetter {
     public void map(int darkTheme, int lightTheme, int mixedTheme) {
         mDarkTheme = darkTheme;
         mLightTheme = lightTheme;
-        mMixedTheme = mixedTheme;
-        setupThemes();
-    }
-
-    public void setDarkTheme(int darkTheme) {
-        mDarkTheme = darkTheme;
-        setupThemes();
-    }
-
-    public void setLightTheme(int lightTheme) {
-        mLightTheme = lightTheme;
-        setupThemes();
-    }
-
-    public void setMixedTheme(int mixedTheme) {
         mMixedTheme = mixedTheme;
         setupThemes();
     }
@@ -132,5 +134,15 @@ public class IAddonThemes implements ThemeSetter {
             context = ((AddonThemeWrapper) context).getBaseContext();
         }
         return context;
+    }
+
+    public interface ThemeResolver {
+        public int resolveThemeForContext(Context context, int invalidTheme);
+    }
+
+    private static final class AddonThemeWrapper extends ContextThemeWrapperPlus {
+        public AddonThemeWrapper(Context base, int themeres) {
+            super(base, themeres);
+        }
     }
 }

@@ -1,22 +1,21 @@
 
 package org.holoeverywhere.demo;
 
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
+
 import org.holoeverywhere.HoloEverywhere;
 import org.holoeverywhere.HoloEverywhere.PreferenceImpl;
 import org.holoeverywhere.LayoutInflater;
 import org.holoeverywhere.ThemeManager;
 import org.holoeverywhere.app.Application;
 
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
-
 public class DemoApplication extends Application {
-    private static final String PACKAGE = DemoApplication.class.getPackage().getName();
     static {
         HoloEverywhere.DEBUG = true;
         HoloEverywhere.PREFERENCE_IMPL = PreferenceImpl.JSON;
 
-        LayoutInflater.registerPackage(PACKAGE + ".widget");
+        LayoutInflater.registerPackage(DemoApplication.class.getPackage().getName() + ".widget");
 
         ThemeManager.setDefaultTheme(ThemeManager.MIXED);
 

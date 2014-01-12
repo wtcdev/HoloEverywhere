@@ -1,20 +1,20 @@
 
 package org.holoeverywhere.addon;
 
-import org.holoeverywhere.app.Activity;
-
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 
-public abstract class IAddonActivity extends IAddonBase<Activity> {
-    public boolean addContentView(View view, LayoutParams params) {
-        return false;
-    }
+import org.holoeverywhere.app.Activity;
 
+/**
+ * Basic addon class which can handle some activity events, like changing content or dispatching keyevents
+ */
+public abstract class IAddonActivity extends IAddonBase<Activity> {
     public boolean closeOptionsMenu() {
         return false;
     }
@@ -25,6 +25,14 @@ public abstract class IAddonActivity extends IAddonBase<Activity> {
 
     public View findViewById(int id) {
         return null;
+    }
+
+    public Handler handler() {
+        return get().getUserHandler();
+    }
+
+    public boolean installDecorView(View view, LayoutParams params) {
+        return false;
     }
 
     public boolean invalidateOptionsMenu() {
@@ -52,6 +60,10 @@ public abstract class IAddonActivity extends IAddonBase<Activity> {
 
     public void onDestroy() {
 
+    }
+
+    public boolean onNavigateUp() {
+        return false;
     }
 
     public boolean onMenuItemSelected(int featureId, android.view.MenuItem item) {
@@ -119,10 +131,6 @@ public abstract class IAddonActivity extends IAddonBase<Activity> {
     }
 
     public boolean requestWindowFeature(int featureId) {
-        return false;
-    }
-
-    public boolean setContentView(View view, LayoutParams params) {
         return false;
     }
 }

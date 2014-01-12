@@ -1,13 +1,13 @@
 
 package org.holoeverywhere.app;
 
-import org.holoeverywhere.R;
-import org.holoeverywhere.widget.ExpandableListView;
-
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnCreateContextMenuListener;
 import android.widget.ExpandableListAdapter;
+
+import org.holoeverywhere.R;
+import org.holoeverywhere.widget.ExpandableListView;
 
 public abstract class ExpandableListActivity extends Activity implements
         OnCreateContextMenuListener, ExpandableListView.OnChildClickListener,
@@ -43,13 +43,13 @@ public abstract class ExpandableListActivity extends Activity implements
 
     @Override
     public boolean onChildClick(ExpandableListView parent, View v,
-            int groupPosition, int childPosition, long id) {
+                                int groupPosition, int childPosition, long id) {
         return false;
     }
 
     @Override
-    public void onContentChanged() {
-        super.onContentChanged();
+    public void onSupportContentChanged() {
+        super.onSupportContentChanged();
         View emptyView = findViewById(R.id.empty);
         mList = (ExpandableListView) findViewById(android.R.id.list);
         if (mList == null) {
@@ -93,7 +93,7 @@ public abstract class ExpandableListActivity extends Activity implements
     }
 
     public boolean setSelectedChild(int groupPosition, int childPosition,
-            boolean shouldExpandGroup) {
+                                    boolean shouldExpandGroup) {
         return mList.setSelectedChild(groupPosition, childPosition,
                 shouldExpandGroup);
     }

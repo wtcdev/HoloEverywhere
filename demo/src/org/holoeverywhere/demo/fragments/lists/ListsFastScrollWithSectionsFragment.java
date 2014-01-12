@@ -1,17 +1,17 @@
 
 package org.holoeverywhere.demo.fragments.lists;
 
+import android.widget.SectionIndexer;
+
+import org.holoeverywhere.demo.R;
+import org.holoeverywhere.util.CharSequences;
+import org.holoeverywhere.widget.ArrayAdapter;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import org.holoeverywhere.ArrayAdapter;
-import org.holoeverywhere.demo.R;
-import org.holoeverywhere.util.CharSequences;
-
-import android.widget.SectionIndexer;
 
 public class ListsFastScrollWithSectionsFragment extends ListsFastScrollFragment {
     private static final class CharacterWrapper {

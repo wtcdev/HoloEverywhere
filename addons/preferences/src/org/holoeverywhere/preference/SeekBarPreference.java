@@ -1,9 +1,6 @@
 
 package org.holoeverywhere.preference;
 
-import org.holoeverywhere.widget.SeekBar;
-import org.holoeverywhere.widget.SeekBar.OnSeekBarChangeListener;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Parcel;
@@ -11,6 +8,9 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.View;
+
+import org.holoeverywhere.widget.SeekBar;
+import org.holoeverywhere.widget.SeekBar.OnSeekBarChangeListener;
 
 public class SeekBarPreference extends Preference implements
         OnSeekBarChangeListener {
@@ -54,7 +54,7 @@ public class SeekBarPreference extends Preference implements
         context = getContext();
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.SeekBarPreference, defStyle, 0);
-        setMax(a.getInt(R.styleable.SeekBarPreference_max, mMax));
+        setMax(a.getInt(R.styleable.SeekBarPreference_android_max, mMax));
         a.recycle();
     }
 
@@ -100,7 +100,7 @@ public class SeekBarPreference extends Preference implements
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress,
-            boolean fromUser) {
+                                  boolean fromUser) {
         if (fromUser && !mTrackingTouch) {
             syncProgress(seekBar);
         }

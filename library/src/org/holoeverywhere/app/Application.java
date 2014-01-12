@@ -1,12 +1,14 @@
 
 package org.holoeverywhere.app;
 
-import java.util.ArrayList;
-import java.util.List;
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.os.Build.VERSION;
+import android.os.Bundle;
+import android.support.v4.app._HoloFragmentInflater;
 
 import org.holoeverywhere.HoloEverywhere;
 import org.holoeverywhere.HoloEverywhere.PreferenceImpl;
-import org.holoeverywhere.IHolo;
 import org.holoeverywhere.LayoutInflater;
 import org.holoeverywhere.LayoutInflater.LayoutInflaterCreator;
 import org.holoeverywhere.SystemServiceManager;
@@ -20,24 +22,23 @@ import org.holoeverywhere.addon.IAddonBasicAttacher;
 import org.holoeverywhere.preference.PreferenceManagerHelper;
 import org.holoeverywhere.preference.SharedPreferences;
 
-import android.annotation.SuppressLint;
-import android.content.Intent;
-import android.os.Build.VERSION;
-import android.os.Bundle;
+import java.util.Collection;
 
 public class Application extends android.app.Application implements
-        IHolo, SuperStartActivity, SuperSystemService, IAddonAttacher<IAddonApplication> {
-    private static List<Class<? extends IAddon>> sInitialAddons;
+        SuperStartActivity, SuperSystemService, IAddonAttacher<IAddonApplication> {
     private static Application sLastInstance;
+
     static {
         SystemServiceManager.register(LayoutInflaterCreator.class);
+        
+        _HoloFragmentInflater.init();
     }
 
-    public static void addInitialAddon(Class<? extends IAddon> clazz) {
-        if (sInitialAddons == null) {
-            sInitialAddons = new ArrayList<Class<? extends IAddon>>();
-        }
-        sInitialAddons.add(clazz);
+    private final IAddonBasicAttacher<IAddonApplication, Application> mAttacher =
+            new IAddonBasicAttacher<IAddonApplication, Application>(this);
+
+    public Application() {
+        Application.sLastInstance = this;
     }
 
     public static Application getLastInstance() {
@@ -47,20 +48,13 @@ public class Application extends android.app.Application implements
     public static void init() {
     }
 
-    private final IAddonAttacher<IAddonApplication> mAttacher =
-            new IAddonBasicAttacher<IAddonApplication, Application>(this);
-
-    public Application() {
-        Application.sLastInstance = this;
-    }
-
     @Override
     public <T extends IAddonApplication> T addon(Class<? extends IAddon> clazz) {
         return mAttacher.addon(clazz);
     }
 
     @Override
-    public void addon(List<Class<? extends IAddon>> classes) {
+    public void addon(Collection<Class<? extends IAddon>> classes) {
         mAttacher.addon(classes);
     }
 
@@ -69,22 +63,18 @@ public class Application extends android.app.Application implements
         return mAttacher.addon(classname);
     }
 
-    @Override
     public SharedPreferences getDefaultSharedPreferences() {
         return PreferenceManagerHelper.getDefaultSharedPreferences(this);
     }
 
-    @Override
     public SharedPreferences getDefaultSharedPreferences(PreferenceImpl impl) {
         return PreferenceManagerHelper.getDefaultSharedPreferences(this, impl);
     }
 
-    @Override
     public LayoutInflater getLayoutInflater() {
         return LayoutInflater.from(this);
     }
 
-    @Override
     public SharedPreferences getSharedPreferences(PreferenceImpl impl, String name, int mode) {
         return PreferenceManagerHelper.wrap(this, impl, name, mode);
     }
@@ -94,7 +84,6 @@ public class Application extends android.app.Application implements
         return PreferenceManagerHelper.wrap(this, name, mode);
     }
 
-    @Override
     public Application getSupportApplication() {
         return this;
     }
@@ -115,20 +104,27 @@ public class Application extends android.app.Application implements
     }
 
     @Override
-    public List<Class<? extends IAddon>> obtainAddonsList() {
+    public Collection<Class<? extends IAddon>> obtainAddonsList() {
         return mAttacher.obtainAddonsList();
     }
 
     @Override
     public void onCreate() {
-        addon(sInitialAddons);
-        lockAttaching();
+        // Cruel fallback for some crazy people who using application like view context
+        // You are warned
+        // Really
+        if (ThemeManager.getThemeType(this) == ThemeManager.INVALID) {
+            setTheme(ThemeManager.getThemeResource(ThemeManager.getDefaultTheme()));
+        }
+
+        IAddonBasicAttacher.attachAnnotations(this);
         performAddonAction(new AddonCallback<IAddonApplication>() {
             @Override
             public void justAction(IAddonApplication addon) {
                 addon.onPreCreate();
             }
         });
+        lockAttaching();
         super.onCreate();
         performAddonAction(new AddonCallback<IAddonApplication>() {
             @Override
@@ -185,7 +181,7 @@ public class Application extends android.app.Application implements
     @Override
     @SuppressLint("NewApi")
     public void superStartActivity(Intent intent, int requestCode,
-            Bundle options) {
+                                   Bundle options) {
         if (VERSION.SDK_INT >= 16) {
             super.startActivity(intent, options);
         } else {

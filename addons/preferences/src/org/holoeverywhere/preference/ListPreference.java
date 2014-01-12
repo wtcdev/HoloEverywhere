@@ -1,14 +1,14 @@
 
 package org.holoeverywhere.preference;
 
-import org.holoeverywhere.app.AlertDialog.Builder;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+
+import org.holoeverywhere.app.AlertDialog.Builder;
 
 public class ListPreference extends DialogPreference {
     private static class SavedState extends BaseSavedState {
@@ -45,8 +45,8 @@ public class ListPreference extends DialogPreference {
         context = getContext();
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.ListPreference, 0, 0);
-        mEntries = a.getTextArray(R.styleable.ListPreference_entries);
-        mEntryValues = a.getTextArray(R.styleable.ListPreference_entryValues);
+        mEntries = a.getTextArray(R.styleable.ListPreference_android_entries);
+        mEntryValues = a.getTextArray(R.styleable.ListPreference_android_entryValues);
         a.recycle();
         mSummary = super.getSummary();
     }

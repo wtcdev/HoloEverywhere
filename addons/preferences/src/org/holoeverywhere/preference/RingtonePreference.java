@@ -1,8 +1,6 @@
 
 package org.holoeverywhere.preference;
 
-import org.holoeverywhere.preference._RingtonePickerDialog.RingtonePickerListener;
-
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +9,8 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+
+import org.holoeverywhere.preference._RingtonePickerDialog.RingtonePickerListener;
 
 public class RingtonePreference extends DialogPreference implements
         RingtonePickerListener {
@@ -32,11 +32,11 @@ public class RingtonePreference extends DialogPreference implements
         context = getContext();
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.RingtonePreference, defStyle, 0);
-        mRingtoneType = a.getInt(R.styleable.RingtonePreference_ringtoneType,
+        mRingtoneType = a.getInt(R.styleable.RingtonePreference_android_ringtoneType,
                 RingtoneManager.TYPE_RINGTONE);
-        mShowDefault = a.getBoolean(R.styleable.RingtonePreference_showDefault,
+        mShowDefault = a.getBoolean(R.styleable.RingtonePreference_android_showDefault,
                 true);
-        mShowSilent = a.getBoolean(R.styleable.RingtonePreference_showSilent,
+        mShowSilent = a.getBoolean(R.styleable.RingtonePreference_android_showSilent,
                 true);
         a.recycle();
     }
@@ -110,7 +110,7 @@ public class RingtonePreference extends DialogPreference implements
 
     @Override
     protected void onSetInitialValue(boolean restorePersistedValue,
-            Object defaultValueObj) {
+                                     Object defaultValueObj) {
         String defaultValue = (String) defaultValueObj;
         if (restorePersistedValue) {
             defaultValue = getPersistedString(defaultValue);

@@ -1,14 +1,14 @@
 
 package org.holoeverywhere.text;
 
-import java.util.Locale;
-
 import android.content.Context;
 import android.graphics.Rect;
 import android.view.View;
 
+import java.util.Locale;
+
 public class AllCapsTransformationMethod implements TransformationMethod {
-    private boolean mEnabled;
+    private boolean mEnabled = true;
     private Locale mLocale;
 
     public AllCapsTransformationMethod(Context context) {
@@ -25,7 +25,7 @@ public class AllCapsTransformationMethod implements TransformationMethod {
 
     @Override
     public void onFocusChanged(View view, CharSequence sourceText, boolean focused, int direction,
-            Rect previouslyFocusedRect) {
+                               Rect previouslyFocusedRect) {
     }
 
     @Override

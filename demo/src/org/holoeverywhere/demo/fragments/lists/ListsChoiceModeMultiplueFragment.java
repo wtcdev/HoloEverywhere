@@ -1,17 +1,16 @@
 
 package org.holoeverywhere.demo.fragments.lists;
 
-import org.holoeverywhere.ArrayAdapter;
-import org.holoeverywhere.demo.R;
-import org.holoeverywhere.widget.ListView;
-
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
+import org.holoeverywhere.demo.R;
+import org.holoeverywhere.widget.ArrayAdapter;
+import org.holoeverywhere.widget.ListView;
 
 public class ListsChoiceModeMultiplueFragment extends ListsBaseFragment {
     private ListView mList;
@@ -48,7 +47,7 @@ public class ListsChoiceModeMultiplueFragment extends ListsBaseFragment {
         setHasOptionsMenu(true);
         mList = getListView();
         mList.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
-        setListAdapter(ArrayAdapter.createFromResource(getActivity(), R.array.adjectives,
+        setListAdapter(ArrayAdapter.createFromResource(getActivity(), R.array.some_words,
                 R.layout.simple_list_item_multiple_choice));
     }
 }

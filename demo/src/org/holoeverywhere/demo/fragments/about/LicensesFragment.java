@@ -1,30 +1,30 @@
 
 package org.holoeverywhere.demo.fragments.about;
 
+import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
+
+import org.holoeverywhere.app.ListFragment;
+import org.holoeverywhere.demo.R;
+import org.holoeverywhere.widget.ArrayAdapter;
+import org.holoeverywhere.widget.TextView;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import org.holoeverywhere.ArrayAdapter;
-import org.holoeverywhere.app.ListFragment;
-import org.holoeverywhere.demo.R;
-import org.holoeverywhere.widget.TextView;
-
-import android.os.Bundle;
-import android.view.View;
-import android.view.ViewGroup;
-
 public class LicensesFragment extends ListFragment {
     private static final class License {
+        private String mLicenseText;
+        private final int mLicenseTextRawId;
+        private final String mProject;
+
         public License(String project, int licenseTextRawId) {
             mProject = project;
             mLicenseTextRawId = licenseTextRawId;
         }
-
-        private final String mProject;
-        private final int mLicenseTextRawId;
-        private String mLicenseText;
     }
 
     private final class LicensesAdapter extends ArrayAdapter<License> {
@@ -62,23 +62,22 @@ public class LicensesFragment extends ListFragment {
         }
     }
 
+    private LicensesAdapter mAdapter;
+
+    private void addLicenses() {
+        mAdapter.add(new License("HoloEverywhere", R.raw.license_mit));
+    }
+
     @Override
     public void onResume() {
         super.onResume();
         getSupportActionBar().setSubtitle("Open source licenses");
     }
 
-    private LicensesAdapter mAdapter;
-
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setListAdapter(mAdapter = new LicensesAdapter());
         addLicenses();
-    }
-
-    private void addLicenses() {
-        mAdapter.add(new License("HoloEverywhere", R.raw.license_lgpl3));
-        mAdapter.add(new License("ActionBarSherlock", R.raw.license_apache2));
     }
 }

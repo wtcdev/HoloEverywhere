@@ -1,9 +1,6 @@
 
 package org.holoeverywhere.widget;
 
-import org.holoeverywhere.R;
-import org.holoeverywhere.app.AlertDialog;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,6 +19,9 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.AbsListView;
 import android.widget.ListAdapter;
 import android.widget.SpinnerAdapter;
+
+import org.holoeverywhere.R;
+import org.holoeverywhere.app.AlertDialog;
 
 public class Spinner extends AbsSpinner implements OnClickListener {
     private class DialogPopup implements SpinnerPopup,
@@ -137,7 +137,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
 
         @Override
         public View getDropDownView(int position, View convertView,
-                ViewGroup parent) {
+                                    ViewGroup parent) {
             return mAdapter == null ? null : mAdapter.getDropDownView(position,
                     convertView, parent);
         }
@@ -217,7 +217,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(android.widget.AdapterView<?> parent,
-                        final View v, final int position, long id) {
+                                        final View v, final int position, long id) {
                     Spinner.this.setSelection(position);
                     if (mOnItemClickListener != null) {
                         Spinner.this.performItemClick(v, position,
@@ -579,7 +579,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
                                     measuredWidth,
                                     measureContentWidth(getAdapter(),
                                             getBackground())), MeasureSpec
-                                    .getSize(widthMeasureSpec)),
+                            .getSize(widthMeasureSpec)),
                     getMeasuredHeight());
         }
     }
@@ -690,7 +690,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         int childLeft = 0;
         int childTop = mSpinnerPadding.top
                 + (getMeasuredHeight() - mSpinnerPadding.bottom
-                        - mSpinnerPadding.top - child.getMeasuredHeight()) / 2;
+                - mSpinnerPadding.top - child.getMeasuredHeight()) / 2;
         int childBottom = childTop + child.getMeasuredHeight();
         int width = child.getMeasuredWidth();
         int childRight = childLeft + width;

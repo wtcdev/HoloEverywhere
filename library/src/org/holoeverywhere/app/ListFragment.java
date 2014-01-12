@@ -1,10 +1,6 @@
 
 package org.holoeverywhere.app;
 
-import org.holoeverywhere.LayoutInflater;
-import org.holoeverywhere.R;
-import org.holoeverywhere.widget.ListView;
-
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -13,6 +9,10 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
+
+import org.holoeverywhere.LayoutInflater;
+import org.holoeverywhere.R;
+import org.holoeverywhere.widget.ListView;
 
 public class ListFragment extends Fragment {
     private ListAdapter mAdapter;
@@ -25,7 +25,7 @@ public class ListFragment extends Fragment {
     final private AdapterView.OnItemClickListener mOnClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View v, int position,
-                long id) {
+                                long id) {
             onListItemClick((ListView) parent, v, position, id);
         }
     };
@@ -116,7 +116,7 @@ public class ListFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
         return inflater.inflate(R.layout.list_content, container, false);
     }
 

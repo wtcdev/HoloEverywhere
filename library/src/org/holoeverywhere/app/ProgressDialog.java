@@ -1,11 +1,6 @@
 
 package org.holoeverywhere.app;
 
-import java.text.NumberFormat;
-
-import org.holoeverywhere.R;
-import org.holoeverywhere.widget.ProgressBar;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -18,30 +13,35 @@ import android.text.style.StyleSpan;
 import android.view.View;
 import android.widget.TextView;
 
+import org.holoeverywhere.R;
+import org.holoeverywhere.widget.ProgressBar;
+
+import java.text.NumberFormat;
+
 public class ProgressDialog extends AlertDialog {
     public static final int STYLE_HORIZONTAL = 1;
     public static final int STYLE_SPINNER = 0;
 
     public static ProgressDialog show(Context context, CharSequence title,
-            CharSequence message) {
+                                      CharSequence message) {
         return ProgressDialog.show(context, title, message, false);
     }
 
     public static ProgressDialog show(Context context, CharSequence title,
-            CharSequence message, boolean indeterminate) {
+                                      CharSequence message, boolean indeterminate) {
         return ProgressDialog.show(context, title, message, indeterminate,
                 false, null);
     }
 
     public static ProgressDialog show(Context context, CharSequence title,
-            CharSequence message, boolean indeterminate, boolean cancelable) {
+                                      CharSequence message, boolean indeterminate, boolean cancelable) {
         return ProgressDialog.show(context, title, message, indeterminate,
                 cancelable, null);
     }
 
     public static ProgressDialog show(Context context, CharSequence title,
-            CharSequence message, boolean indeterminate, boolean cancelable,
-            OnCancelListener cancelListener) {
+                                      CharSequence message, boolean indeterminate, boolean cancelable,
+                                      OnCancelListener cancelListener) {
         ProgressDialog dialog = new ProgressDialog(context);
         dialog.setTitle(title);
         dialog.setMessage(message);

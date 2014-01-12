@@ -1,15 +1,15 @@
 
 package org.holoeverywhere.widget;
 
-import org.holoeverywhere.R;
-import org.holoeverywhere.internal._View;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.View;
 
-public class Divider extends _View {
+import org.holoeverywhere.R;
+
+public class Divider extends View {
     public Divider(Context context) {
         super(context);
         init(context, null, 0);

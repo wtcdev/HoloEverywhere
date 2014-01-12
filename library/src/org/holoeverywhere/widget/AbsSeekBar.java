@@ -1,9 +1,6 @@
 
 package org.holoeverywhere.widget;
 
-import org.holoeverywhere.R;
-import org.holoeverywhere.internal._View;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -11,12 +8,15 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+
+import org.holoeverywhere.R;
 
 public abstract class AbsSeekBar extends ProgressBar {
     private static final int NO_ALPHA = 0xFF;
@@ -161,7 +161,7 @@ public abstract class AbsSeekBar extends ProgressBar {
 
     @Override
     protected synchronized void onMeasure(int widthMeasureSpec,
-            int heightMeasureSpec) {
+                                          int heightMeasureSpec) {
         Drawable d = getCurrentDrawable();
         int thumbHeight = mThumb == null ? 0 : mThumb.getIntrinsicHeight();
         int dw = 0;
@@ -176,8 +176,8 @@ public abstract class AbsSeekBar extends ProgressBar {
         dw += getPaddingLeft() + getPaddingRight();
         dh += getPaddingTop() + getPaddingBottom();
         setMeasuredDimension(
-                _View.supportResolveSizeAndState(dw, widthMeasureSpec, 0),
-                _View.supportResolveSizeAndState(dh, heightMeasureSpec, 0));
+                ViewCompat.resolveSizeAndState(dw, widthMeasureSpec, 0),
+                ViewCompat.resolveSizeAndState(dh, heightMeasureSpec, 0));
     }
 
     @Override
@@ -318,8 +318,8 @@ public abstract class AbsSeekBar extends ProgressBar {
             mThumbOffset = thumb.getIntrinsicWidth() / 2;
             if (needUpdate
                     && (thumb.getIntrinsicWidth() != mThumb.getIntrinsicWidth() || thumb
-                            .getIntrinsicHeight() != mThumb
-                            .getIntrinsicHeight())) {
+                    .getIntrinsicHeight() != mThumb
+                    .getIntrinsicHeight())) {
                 requestLayout();
             }
         }

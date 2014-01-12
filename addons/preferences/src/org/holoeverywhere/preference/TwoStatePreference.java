@@ -14,38 +14,6 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.TextView;
 
 public abstract class TwoStatePreference extends Preference {
-
-    static class SavedState extends BaseSavedState {
-        public static final Parcelable.Creator<SavedState> CREATOR = new Parcelable.Creator<SavedState>() {
-            @Override
-            public SavedState createFromParcel(Parcel in) {
-                return new SavedState(in);
-            }
-
-            @Override
-            public SavedState[] newArray(int size) {
-                return new SavedState[size];
-            }
-        };
-
-        boolean checked;
-
-        public SavedState(Parcel source) {
-            super(source);
-            checked = source.readInt() == 1;
-        }
-
-        public SavedState(Parcelable superState) {
-            super(superState);
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            super.writeToParcel(dest, flags);
-            dest.writeInt(checked ? 1 : 0);
-        }
-    }
-
     boolean mChecked;
     private boolean mDisableDependentsState;
     private boolean mSendClickAccessibilityEvent;
@@ -56,10 +24,10 @@ public abstract class TwoStatePreference extends Preference {
         context = getContext();
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.TwoStatePreference,
                 defStyle, R.style.Holo_PreferenceTwoState);
-        mSummaryOn = a.getText(R.styleable.TwoStatePreference_summaryOn);
-        mSummaryOff = a.getText(R.styleable.TwoStatePreference_summaryOff);
+        mSummaryOn = a.getText(R.styleable.TwoStatePreference_android_summaryOn);
+        mSummaryOff = a.getText(R.styleable.TwoStatePreference_android_summaryOff);
         mDisableDependentsState = a.getBoolean(
-                R.styleable.TwoStatePreference_disableDependentsState, false);
+                R.styleable.TwoStatePreference_android_disableDependentsState, false);
         a.recycle();
     }
 
@@ -67,16 +35,51 @@ public abstract class TwoStatePreference extends Preference {
         return mDisableDependentsState;
     }
 
+    public void setDisableDependentsState(boolean disableDependentsState) {
+        mDisableDependentsState = disableDependentsState;
+    }
+
     public CharSequence getSummaryOff() {
         return mSummaryOff;
+    }
+
+    public void setSummaryOff(int summaryResId) {
+        setSummaryOff(getContext().getString(summaryResId));
+    }
+
+    public void setSummaryOff(CharSequence summary) {
+        mSummaryOff = summary;
+        if (!isChecked()) {
+            notifyChanged();
+        }
     }
 
     public CharSequence getSummaryOn() {
         return mSummaryOn;
     }
 
+    public void setSummaryOn(int summaryResId) {
+        setSummaryOn(getContext().getString(summaryResId));
+    }
+
+    public void setSummaryOn(CharSequence summary) {
+        mSummaryOn = summary;
+        if (isChecked()) {
+            notifyChanged();
+        }
+    }
+
     public boolean isChecked() {
         return mChecked;
+    }
+
+    public void setChecked(boolean checked) {
+        if (mChecked != checked) {
+            mChecked = checked;
+            persistBoolean(checked);
+            notifyDependencyChange(shouldDisableDependents());
+            notifyChanged();
+        }
     }
 
     @Override
@@ -144,41 +147,6 @@ public abstract class TwoStatePreference extends Preference {
         mSendClickAccessibilityEvent = false;
     }
 
-    public void setChecked(boolean checked) {
-        if (mChecked != checked) {
-            mChecked = checked;
-            persistBoolean(checked);
-            notifyDependencyChange(shouldDisableDependents());
-            notifyChanged();
-        }
-    }
-
-    public void setDisableDependentsState(boolean disableDependentsState) {
-        mDisableDependentsState = disableDependentsState;
-    }
-
-    public void setSummaryOff(CharSequence summary) {
-        mSummaryOff = summary;
-        if (!isChecked()) {
-            notifyChanged();
-        }
-    }
-
-    public void setSummaryOff(int summaryResId) {
-        setSummaryOff(getContext().getString(summaryResId));
-    }
-
-    public void setSummaryOn(CharSequence summary) {
-        mSummaryOn = summary;
-        if (isChecked()) {
-            notifyChanged();
-        }
-    }
-
-    public void setSummaryOn(int summaryResId) {
-        setSummaryOn(getContext().getString(summaryResId));
-    }
-
     @Override
     public boolean shouldDisableDependents() {
         return mDisableDependentsState ? mChecked : !mChecked
@@ -207,6 +175,36 @@ public abstract class TwoStatePreference extends Preference {
             if (newVisibility != summaryView.getVisibility()) {
                 summaryView.setVisibility(newVisibility);
             }
+        }
+    }
+
+    static class SavedState extends BaseSavedState {
+        public static final Parcelable.Creator<SavedState> CREATOR = new Parcelable.Creator<SavedState>() {
+            @Override
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            @Override
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+        boolean checked;
+
+        public SavedState(Parcel source) {
+            super(source);
+            checked = source.readInt() == 1;
+        }
+
+        public SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeInt(checked ? 1 : 0);
         }
     }
 }

@@ -1,12 +1,6 @@
 
 package org.holoeverywhere.widget;
 
-import java.lang.ref.WeakReference;
-
-import org.holoeverywhere.R;
-import org.holoeverywhere.drawable.DrawableCompat;
-import org.holoeverywhere.drawable.StateListDrawable;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -27,6 +21,12 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnScrollChangedListener;
 import android.view.WindowManager;
+
+import org.holoeverywhere.R;
+import org.holoeverywhere.drawable.DrawableCompat;
+import org.holoeverywhere.drawable.StateListDrawable;
+
+import java.lang.ref.WeakReference;
 
 public class PopupWindow {
     public interface OnDismissListener {
@@ -110,7 +110,7 @@ public class PopupWindow {
         }
     }
 
-    private static final int[] ABOVE_ANCHOR_STATE_SET = new int[] {
+    private static final int[] ABOVE_ANCHOR_STATE_SET = new int[]{
             android.R.attr.state_above_anchor
     };
     public static final int INPUT_METHOD_FROM_FOCUSABLE = 0;
@@ -180,7 +180,7 @@ public class PopupWindow {
     }
 
     public PopupWindow(Context context, AttributeSet attrs) {
-        this(context, attrs, android.R.attr.popupWindowStyle);
+        this(context, attrs, R.attr.popupWindowStyle);
     }
 
     public PopupWindow(Context context, AttributeSet attrs, int defStyle) {
@@ -261,7 +261,7 @@ public class PopupWindow {
                         WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH |
                         WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS |
                         WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM |
-                WindowManager.LayoutParams.FLAG_SPLIT_TOUCH);
+                        WindowManager.LayoutParams.FLAG_SPLIT_TOUCH);
         if (mIgnoreCheekPress) {
             curFlags |= WindowManager.LayoutParams.FLAG_IGNORE_CHEEK_PRESSES;
         }
@@ -334,7 +334,7 @@ public class PopupWindow {
     }
 
     private boolean findDropDownPosition(View anchor, WindowManager.LayoutParams p,
-            int xoff, int yoff) {
+                                         int xoff, int yoff) {
         final int anchorHeight = anchor.getHeight();
         anchor.getLocationInWindow(mDrawingLocation);
         p.x = mDrawingLocation[0] + xoff;
@@ -513,7 +513,7 @@ public class PopupWindow {
             PopupViewContainer popupViewContainer = new PopupViewContainer(mContext);
             PopupViewContainer.LayoutParams listParams = new PopupViewContainer.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, height
-                    );
+            );
             popupViewContainer.setBackgroundDrawable(mBackground);
             popupViewContainer.addView(mContentView, listParams);
             mPopupView = popupViewContainer;
@@ -780,7 +780,7 @@ public class PopupWindow {
     }
 
     private void update(View anchor, boolean updateLocation, int xoff, int yoff,
-            boolean updateDimension, int width, int height) {
+                        boolean updateDimension, int width, int height) {
         if (!isShowing() || mContentView == null) {
             return;
         }

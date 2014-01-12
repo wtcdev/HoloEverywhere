@@ -8,26 +8,30 @@
 
 	<parent>
 		<groupId>org.holoeverywhere</groupId>
-		<artifactId>application</artifactId>
-		<version>1.5.1-SNAPSHOT</version>
-		<relativePath>../application/pom.xml</relativePath>
+		<artifactId>parent</artifactId>
+		<version>2.1.0</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<dependencies>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<groupId>org.holoeverywhere</groupId>
+			<artifactId>library</artifactId>
+			<version>${project.version}</version>
+			<type>apklib</type>
 		</dependency>
 
 		<dependency>
 			<groupId>org.holoeverywhere</groupId>
 			<artifactId>addon-slider</artifactId>
+			<version>${project.version}</version>
 			<type>apklib</type>
 		</dependency>
 
 		<dependency>
 			<groupId>org.holoeverywhere</groupId>
 			<artifactId>addon-preferences</artifactId>
+			<version>${project.version}</version>
 			<type>apklib</type>
 		</dependency>
 	</dependencies>
@@ -51,6 +55,10 @@
 						<file>attrs.json:attrs</file>
 					</inputFiles>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
+				<artifactId>android-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>

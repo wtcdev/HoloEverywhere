@@ -6,12 +6,11 @@ gen() {
 		mkdir "$png"
 	fi
 	png="$png/$name.png"
-	if [ -e "$png" ]; then
-		rm "$png"
+	if [ ! -e "$png" ]; then
+		inkscape -zCd $3 -e "$png" "$1" > /dev/null
+		convert -antialias -strip "$png" "$png"
+		optipng -quiet -o7 "$png"
 	fi
-	inkscape -zCd $3 -e "$png" "$1" > /dev/null
-	convert -antialias -strip "$png" "$png"
-	optipng -quiet -o7 "$png"
 }
 
 for z in *.svg; do
@@ -24,4 +23,6 @@ for z in *.svg; do
 	gen $z hdpi 120
 	echo "  # XHDPI"
 	gen $z xhdpi 180
+	echo "  # XXHDPI"
+	gen $z xxhdpi 270
 done

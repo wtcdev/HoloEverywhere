@@ -1,17 +1,6 @@
 
 package org.holoeverywhere.widget;
 
-import java.util.ArrayList;
-
-import org.holoeverywhere.R;
-import org.holoeverywhere.drawable.DrawableCompat;
-import org.holoeverywhere.internal._View;
-import org.holoeverywhere.util.Pool;
-import org.holoeverywhere.util.Poolable;
-import org.holoeverywhere.util.PoolableManager;
-import org.holoeverywhere.util.Pools;
-import org.holoeverywhere.util.ReflectHelper;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -32,6 +21,7 @@ import android.graphics.drawable.shapes.RoundRectShape;
 import android.graphics.drawable.shapes.Shape;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
@@ -45,6 +35,16 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.Transformation;
+
+import org.holoeverywhere.R;
+import org.holoeverywhere.drawable.DrawableCompat;
+import org.holoeverywhere.util.Pool;
+import org.holoeverywhere.util.Poolable;
+import org.holoeverywhere.util.PoolableManager;
+import org.holoeverywhere.util.Pools;
+import org.holoeverywhere.util.ReflectHelper;
+
+import java.util.ArrayList;
 
 public class ProgressBar extends android.widget.ProgressBar {
     private class AccessibilityEventSender implements Runnable {
@@ -129,7 +129,7 @@ public class ProgressBar extends android.widget.ProgressBar {
         }
     }
 
-    protected static class SavedState extends BaseSavedState {
+    static class SavedState extends BaseSavedState {
         public static final Parcelable.Creator<SavedState> CREATOR = new Parcelable.Creator<SavedState>() {
             @Override
             public SavedState createFromParcel(Parcel in) {
@@ -204,7 +204,7 @@ public class ProgressBar extends android.widget.ProgressBar {
     }
 
     public ProgressBar(Context context, AttributeSet attrs, int defStyle,
-            int styleRes) {
+                       int styleRes) {
         super(context, attrs, defStyle);
         mUiThreadId = Thread.currentThread().getId();
         initProgressBar();
@@ -255,12 +255,12 @@ public class ProgressBar extends android.widget.ProgressBar {
         mNoInvalidate = false;
         setIndeterminate(mOnlyIndeterminate
                 || a.getBoolean(R.styleable.ProgressBar_android_indeterminate,
-                        mIndeterminate));
+                mIndeterminate));
         a.recycle();
     }
 
     private synchronized void doRefreshProgress(int id, int progress,
-            boolean fromUser, boolean callBackToApp) {
+                                                boolean fromUser, boolean callBackToApp) {
         float scale = mMax > 0 ? (float) progress / (float) mMax : 0;
         final Drawable d = mCurrentDrawable;
         if (d != null) {
@@ -274,7 +274,7 @@ public class ProgressBar extends android.widget.ProgressBar {
         } else {
             invalidate();
         }
-        if (callBackToApp && id == R.id.progress) {
+        if (callBackToApp && id == android.R.id.progress) {
             onProgressRefresh(scale, fromUser);
         }
     }
@@ -290,7 +290,7 @@ public class ProgressBar extends android.widget.ProgressBar {
     }
 
     private Shape getDrawableShape() {
-        final float[] roundedCorners = new float[] {
+        final float[] roundedCorners = new float[]{
                 5, 5, 5, 5, 5, 5, 5, 5
         };
         return new RoundRectShape(roundedCorners, null, null);
@@ -478,7 +478,7 @@ public class ProgressBar extends android.widget.ProgressBar {
 
     @Override
     protected synchronized void onMeasure(int widthMeasureSpec,
-            int heightMeasureSpec) {
+                                          int heightMeasureSpec) {
         Drawable d = mCurrentDrawable;
         int dw = 0;
         int dh = 0;
@@ -492,8 +492,8 @@ public class ProgressBar extends android.widget.ProgressBar {
         dw += getPaddingLeft() + getPaddingRight();
         dh += getPaddingTop() + getPaddingBottom();
         setMeasuredDimension(
-                _View.supportResolveSizeAndState(dw, widthMeasureSpec, 0),
-                _View.supportResolveSizeAndState(dh, heightMeasureSpec, 0));
+                ViewCompat.resolveSizeAndState(dw, widthMeasureSpec, 0),
+                ViewCompat.resolveSizeAndState(dh, heightMeasureSpec, 0));
     }
 
     protected void onProgressRefresh(float scale, boolean fromUser) {
@@ -551,7 +551,7 @@ public class ProgressBar extends android.widget.ProgressBar {
     }
 
     private synchronized void refreshProgress(int id, int progress,
-            boolean fromUser) {
+                                              boolean fromUser) {
         if (mUiThreadId == Thread.currentThread().getId()) {
             doRefreshProgress(id, progress, fromUser, true);
         } else if (mRefreshData != null) {
@@ -629,7 +629,7 @@ public class ProgressBar extends android.widget.ProgressBar {
             if (mProgress > max) {
                 mProgress = max;
             }
-            refreshProgress(R.id.progress, mProgress, false);
+            refreshProgress(android.R.id.progress, mProgress, false);
         }
     }
 
@@ -650,7 +650,7 @@ public class ProgressBar extends android.widget.ProgressBar {
         }
         if (progress != mProgress) {
             mProgress = progress;
-            refreshProgress(R.id.progress, mProgress, fromUser);
+            refreshProgress(android.R.id.progress, mProgress, fromUser);
         }
     }
 
@@ -679,8 +679,8 @@ public class ProgressBar extends android.widget.ProgressBar {
         if (needUpdate) {
             updateDrawableBounds(getWidth(), getHeight());
             updateDrawableState();
-            doRefreshProgress(R.id.progress, mProgress, false, false);
-            doRefreshProgress(R.id.secondaryProgress, mSecondaryProgress,
+            doRefreshProgress(android.R.id.progress, mProgress, false, false);
+            doRefreshProgress(android.R.id.secondaryProgress, mSecondaryProgress,
                     false, false);
         }
     }
@@ -698,7 +698,7 @@ public class ProgressBar extends android.widget.ProgressBar {
         }
         if (secondaryProgress != mSecondaryProgress) {
             mSecondaryProgress = secondaryProgress;
-            refreshProgress(R.id.secondaryProgress, mSecondaryProgress, false);
+            refreshProgress(android.R.id.secondaryProgress, mSecondaryProgress, false);
         }
     }
 
@@ -765,7 +765,7 @@ public class ProgressBar extends android.widget.ProgressBar {
             for (int i = 0; i < N; i++) {
                 int id = background.getId(i);
                 outDrawables[i] = tileify(background.getDrawable(i),
-                        id == R.id.progress || id == R.id.secondaryProgress);
+                        id == android.R.id.progress || id == android.R.id.secondaryProgress);
             }
             LayerDrawable newBg = new LayerDrawable(outDrawables);
             for (int i = 0; i < N; i++) {
