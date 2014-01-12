@@ -16,7 +16,6 @@ import android.support.v4.util.LongSparseArray;
 import android.support.v7.internal.view.menu.ContextMenuBuilder.ContextMenuInfoGetter;
 import android.support.v7.view.ActionMode;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.HapticFeedbackConstants;
@@ -546,17 +545,12 @@ public class ListView extends android.widget.ListView implements OnWindowFocusCh
 
     @Override
     public Parcelable onSaveInstanceState() {
-    	try {
-	        SavedState ss = new SavedState(super.onSaveInstanceState());
-	        ss.inActionMode = mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL && mChoiceActionMode != null;
-	        ss.checkState = mCheckStates;
-	        ss.checkIdState = mCheckedIdStates;
-	        ss.checkedItemCount = mCheckedItemCount;
-	        return ss;
-		} catch (Exception e) {
-			Log.e(ListView.class.getSimpleName(), "DE766: Caught SavedState class not found exception.", e);
-			return null;
-		}
+        SavedState ss = new SavedState(super.onSaveInstanceState());
+        ss.inActionMode = mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL && mChoiceActionMode != null;
+        ss.checkState = mCheckStates;
+        ss.checkIdState = mCheckedIdStates;
+        ss.checkedItemCount = mCheckedItemCount;
+        return ss;
     }
 
     @Override
